@@ -1,10 +1,8 @@
-import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 import type { PropsWithChildren } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import Animated, {
-  interpolate,
   useAnimatedScrollHandler,
-  useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
 
@@ -29,18 +27,16 @@ const BLENDED_WINZZ_GRADIENT = {
   ] as [number, number, ...number[]],    // locations tuple
 };
 
-// Header gradient (first part of blended gradient)
-const HEADER_GRADIENT = {
-  colors: BLENDED_WINZZ_GRADIENT.colors.slice(0, 3) as [string, string, ...string[]],
-  locations: [0, 0.5, 1] as [number, number, number],
-};
+type Props = PropsWithChildren<{
+  backgroundImage?: any;
+  overrideGradient?: boolean;
+}>;
 
-// Header height (10% of screen height)
-const HEADER_HEIGHT = SCREEN_HEIGHT * 0.1;
-
-type Props = PropsWithChildren<{}>;
-
-export default function ParallaxScrollView({ children }: Props) {
+export default function ParallaxScrollView({ 
+  children, 
+  backgroundImage, 
+  overrideGradient = false
+}: Props) {
   const scrollY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -49,91 +45,70 @@ export default function ParallaxScrollView({ children }: Props) {
     },
   });
 
-  const headerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-          [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75],
-          "clamp"
-        ),
-      },
-      {
-        scale: interpolate(
-          scrollY.value,
-          [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-          [2, 1, 1],
-          "clamp"
-        ),
-      },
-    ],
-  }));
-
   return (
-    <Animated.ScrollView
-      style={styles.scrollView}
-      scrollEventThrottle={16}
-      onScroll={scrollHandler}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Main background with **brighter, redder** blended gradient */}
-      <LinearGradient
-        colors={BLENDED_WINZZ_GRADIENT.colors}
-        locations={BLENDED_WINZZ_GRADIENT.locations}
-        style={styles.gradientBackground}
+    <View style={styles.container}>
+      {/* Fixed background image */}
+      {backgroundImage && (
+        <Image 
+          source={backgroundImage}
+          style={styles.backgroundImageFixed}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          onLoad={() => console.log('Background image loaded')}
+          onError={(error) => console.log('Background image error:', error)}
+        />
+      )}
+
+      <Animated.ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        scrollEventThrottle={16}
+        onScroll={scrollHandler}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={false}
       >
-        {/* Parallax Header */}
-        <Animated.View style={[styles.header, headerAnimatedStyle]}>
-          <LinearGradient
-            colors={HEADER_GRADIENT.colors}
-            locations={HEADER_GRADIENT.locations}
-            style={styles.headerFill}
-          />
-        </Animated.View>
-
-        {/* Spacer to push content below header */}
-        <View style={styles.headerSpacer} />
-
         {/* Content Area */}
-        <View style={styles.content}>{children}</View>
-      </LinearGradient>
-    </Animated.ScrollView>
+        <View style={styles.content}>
+          {children}
+        </View>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-  },
-  gradientBackground: {
-    width: SCREEN_WIDTH,
-    minHeight: SCREEN_HEIGHT,
+  container: {
     flex: 1,
   },
-  header: {
-    height: HEADER_HEIGHT,
-    width: SCREEN_WIDTH,
-    overflow: "hidden",
+  backgroundImageFixed: {
     position: "absolute",
     top: 0,
     left: 0,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    opacity: 1,
+    zIndex: 1,
   },
-  headerFill: {
+  scrollView: {
     flex: 1,
-    width: "100%",
-    height: "100%",
+    zIndex: 2, // Above background image
   },
-  headerSpacer: {
-    height: HEADER_HEIGHT,
-    backgroundColor: "transparent",
+  scrollViewContent: {
+    flexGrow: 1, // Important: allows content to expand and be scrollable
+    minHeight: SCREEN_HEIGHT, // Ensures minimum scrollable area
   },
   content: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 60, // Safe area padding
+    paddingBottom: 16,
     gap: 16,
-    backgroundColor: "transparent",
+    zIndex: 5, // Above the image so text is visible
+    position: "relative",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: 0,
   },
 });
 

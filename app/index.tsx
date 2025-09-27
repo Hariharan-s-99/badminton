@@ -1,6 +1,8 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import SportSelection from "./SportSelection";
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -8,15 +10,19 @@ export default function HomeScreen() {
     setTimeout(() => setLoading(false), 5000);
   }, []);
   return (
-    <ParallaxScrollView>
+    <ParallaxScrollView backgroundImage={require("../assets/images/app_background.svg")}>
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#FF4C4C" />
+          <Image 
+            source={require("../assets/images/winzz_logo.svg")} 
+            style={styles.logo}
+            contentFit="cover"
+            contentPosition="top center"
+          />
+          <ActivityIndicator size="large" color="#FF4C4C" style={styles.loader} />
         </View>
       ) : (
-        <View>
-          <Text>hello</Text>
-        </View>
+        <SportSelection />
       )}
     </ParallaxScrollView>
   );
@@ -29,5 +35,15 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
+  },
+  logo: {
+    width: "80%",
+    aspectRatio: 498 / 142,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  loader: {
+    marginTop: 8,
+    alignSelf: "center",
   },
 });
