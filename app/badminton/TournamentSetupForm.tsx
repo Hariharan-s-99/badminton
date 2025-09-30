@@ -211,7 +211,8 @@ const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentC
 const styles = StyleSheet.create({
   scrollContent: { 
     padding: 20, 
-    paddingBottom: 120 
+    paddingBottom: 120,
+    backgroundColor: '#1A0505', // Dark background
   },
   header: {
     alignItems: 'center',
@@ -225,47 +226,65 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 28,
     marginBottom: 8,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(139, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
     fontSize: 15,
-    color: COLORS.BORDER,
+    color: '#B89090',
     textAlign: 'center',
     lineHeight: 20,
   },
   section: {
     marginBottom: 28,
+    backgroundColor: 'rgba(139, 0, 0, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 0, 0, 0.3)',
   },
   sectionLabel: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.TEXT_PRIMARY || '#1A1A1A',
+    color: '#FFFFFF',
     marginBottom: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   sectionHint: {
     fontSize: 13,
-    color: COLORS.BORDER,
+    color: '#B89090',
     marginBottom: 12,
   },
   nameInput: {
     fontSize: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    color: '#FFFFFF',
+    borderColor: 'rgba(139, 0, 0, 0.5)',
   },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    backgroundColor: COLORS.BACKGROUND || '#F8F9FA',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 0, 0, 0.4)',
   },
   stepperButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    elevation: 2,
-    shadowColor: '#000',
+    backgroundColor: '#8B0000',
+    elevation: 4,
+    shadowColor: '#8B0000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
   },
   stepperValueContainer: {
@@ -275,11 +294,11 @@ const styles = StyleSheet.create({
   stepperValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.ACCENT,
+    color: '#FF6B6B',
   },
   stepperLabel: {
     fontSize: 12,
-    color: COLORS.BORDER,
+    color: '#B89090',
     marginTop: 2,
   },
   playersGrid: {
@@ -294,9 +313,11 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.ACCENT,
+    backgroundColor: '#8B0000',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   playerNumberText: {
     color: '#FFFFFF',
@@ -306,22 +327,27 @@ const styles = StyleSheet.create({
   playerInput: {
     flex: 1,
     marginVertical: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    color: '#FFFFFF',
+    borderColor: 'rgba(139, 0, 0, 0.5)',
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FEE',
+    backgroundColor: 'rgba(139, 0, 0, 0.3)',
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#8B0000',
   },
   errorIcon: {
     fontSize: 20,
   },
   error: {
-    color: COLORS.ERROR,
+    color: '#FF6B6B',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -330,8 +356,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   disabledInput: {
-    backgroundColor: '#F0F0F0',
-    opacity: 0.7,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    opacity: 0.6,
   },
   actionButton: {
     marginTop: 8,
