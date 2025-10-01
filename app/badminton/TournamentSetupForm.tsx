@@ -2,13 +2,26 @@ import StyledButton from '@/components/ui/StyledButton';
 import TeamCard from '@/components/ui/TeamCard';
 import React, { useEffect, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { COLORS, globalStyles } from '../utils/styles';
 import { Tournament } from '../utils/types';
 import { generateRoundRobinMatches, generateTeams, generateTimeSlots } from '../utils/utils';
 
 interface TournamentSetupFormProps {
   onTournamentCreated: (tournament: Tournament) => void;
 }
+
+// Dark Red Theme Colors
+const COLORS = {
+  BACKGROUND: '#1A0505',
+  TEXT_PRIMARY: '#FFFFFF',
+  TEXT_SECONDARY: '#B89090',
+  PRIMARY: '#8B0000',
+  ACCENT: '#FF6B6B',
+  CARD_BG: 'rgba(139, 0, 0, 0.15)',
+  INPUT_BG: 'rgba(0, 0, 0, 0.3)',
+  BORDER: 'rgba(139, 0, 0, 0.5)',
+  SECTION_BORDER: 'rgba(139, 0, 0, 0.3)',
+  ERROR_BG: 'rgba(139, 0, 0, 0.3)',
+};
 
 const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentCreated }) => {
   const [setupStage, setSetupStage] = useState<'input' | 'teams'>('input');
@@ -96,12 +109,12 @@ const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentC
         </View>
         <TextInput
           style={[
-            globalStyles.input,
+            styles.input,
             styles.playerInput,
             setupStage === 'teams' && styles.disabledInput
           ]}
           placeholder={`Player ${index + 1} Name`}
-          placeholderTextColor={COLORS.BORDER}
+          placeholderTextColor={COLORS.TEXT_SECONDARY}
           value={players[index]}
           onChangeText={(text) => handlePlayerChange(text, index)}
           editable={setupStage === 'input'}
@@ -112,20 +125,20 @@ const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentC
 
   if (setupStage === 'input') {
     return (
-      <ScrollView style={globalStyles.container} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fadeAnim }}>
           <View style={styles.header}>
             <Text style={styles.headerEmoji}>🏆</Text>
-            <Text style={[globalStyles.title, styles.mainTitle]}>Create Tournament</Text>
+            <Text style={styles.mainTitle}>Create Tournament</Text>
             <Text style={styles.subtitle}>Set up your badminton doubles tournament</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Tournament Name</Text>
             <TextInput
-              style={[globalStyles.input, styles.nameInput]}
+              style={[styles.input, styles.nameInput]}
               placeholder="e.g. Summer Championship 2025"
-              placeholderTextColor={COLORS.BORDER}
+              placeholderTextColor={COLORS.TEXT_SECONDARY}
               value={name}
               onChangeText={setName}
             />
@@ -180,11 +193,11 @@ const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentC
   }
 
   return (
-    <ScrollView style={globalStyles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <Animated.View style={{ opacity: fadeAnim }}>
         <View style={styles.header}>
           <Text style={styles.headerEmoji}>🎯</Text>
-          <Text style={[globalStyles.title, styles.mainTitle]}>Teams Generated</Text>
+          <Text style={styles.mainTitle}>Teams Generated</Text>
           <Text style={styles.subtitle}>
             {teamsGenerated.length} teams have been randomly paired
           </Text>
@@ -209,10 +222,13 @@ const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentC
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.BACKGROUND,
+  },
   scrollContent: { 
     padding: 20, 
     paddingBottom: 120,
-    backgroundColor: '#1A0505', // Dark background
   },
   header: {
     alignItems: 'center',
@@ -226,29 +242,31 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 28,
     marginBottom: 8,
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(139, 0, 0, 0.5)',
+    fontWeight: 'bold',
+    color: COLORS.TEXT_PRIMARY,
+    textAlign: 'center',
+    textShadowColor: 'rgba(139, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   subtitle: {
     fontSize: 15,
-    color: '#B89090',
+    color: COLORS.TEXT_SECONDARY,
     textAlign: 'center',
     lineHeight: 20,
   },
   section: {
     marginBottom: 28,
-    backgroundColor: 'rgba(139, 0, 0, 0.15)',
+    backgroundColor: COLORS.CARD_BG,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(139, 0, 0, 0.3)',
+    borderColor: COLORS.SECTION_BORDER,
   },
   sectionLabel: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.TEXT_PRIMARY,
     marginBottom: 6,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
@@ -256,21 +274,28 @@ const styles = StyleSheet.create({
   },
   sectionHint: {
     fontSize: 13,
-    color: '#B89090',
+    color: COLORS.TEXT_SECONDARY,
     marginBottom: 12,
+  },
+  input: {
+    backgroundColor: COLORS.INPUT_BG,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: COLORS.TEXT_PRIMARY,
+    marginVertical: 6,
   },
   nameInput: {
     fontSize: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    color: '#FFFFFF',
-    borderColor: 'rgba(139, 0, 0, 0.5)',
   },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: COLORS.INPUT_BG,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -280,9 +305,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#8B0000',
+    backgroundColor: COLORS.PRIMARY,
     elevation: 4,
-    shadowColor: '#8B0000',
+    shadowColor: COLORS.PRIMARY,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
@@ -294,11 +319,11 @@ const styles = StyleSheet.create({
   stepperValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FF6B6B',
+    color: COLORS.ACCENT,
   },
   stepperLabel: {
     fontSize: 12,
-    color: '#B89090',
+    color: COLORS.TEXT_SECONDARY,
     marginTop: 2,
   },
   playersGrid: {
@@ -313,41 +338,38 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#8B0000',
+    backgroundColor: COLORS.PRIMARY,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   playerNumberText: {
-    color: '#FFFFFF',
+    color: COLORS.TEXT_PRIMARY,
     fontWeight: '700',
     fontSize: 14,
   },
   playerInput: {
     flex: 1,
     marginVertical: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    color: '#FFFFFF',
-    borderColor: 'rgba(139, 0, 0, 0.5)',
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(139, 0, 0, 0.3)',
+    backgroundColor: COLORS.ERROR_BG,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#8B0000',
+    borderColor: COLORS.PRIMARY,
   },
   errorIcon: {
     fontSize: 20,
   },
   error: {
-    color: '#FF6B6B',
+    color: COLORS.ACCENT,
     fontSize: 14,
     fontWeight: '600',
   },
