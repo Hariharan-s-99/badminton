@@ -10,16 +10,23 @@ export default function HomeScreen() {
     setTimeout(() => setLoading(false), 5000);
   }, []);
   return (
-    <ParallaxScrollView backgroundImage={require("../assets/images/app_background.svg")}>
+    <ParallaxScrollView
+      backgroundImage={require("../assets/images/app_background.svg")}
+      winzzLogo={!loading}
+    >
       {loading ? (
         <View style={styles.loaderContainer}>
-          <Image 
-            source={require("../assets/images/winzz_logo.svg")} 
+          <Image
+            source={require("../assets/images/winzz_logo.svg")}
             style={styles.logo}
             contentFit="cover"
             contentPosition="top center"
           />
-          <ActivityIndicator size="large" color="#FF4C4C" style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color="#FF4C4C"
+            style={styles.loader}
+          />
         </View>
       ) : (
         <SportSelection />
@@ -37,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: "80%",
+    width: "100%",
     aspectRatio: 498 / 142,
     alignSelf: "center",
     marginBottom: 16,

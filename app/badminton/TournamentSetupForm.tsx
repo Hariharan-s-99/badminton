@@ -1,281 +1,383 @@
-import StyledButton from '@/components/ui/StyledButton';
-import TeamCard from '@/components/ui/TeamCard';
-import React, { useEffect, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Tournament } from '../utils/types';
-import { generateRoundRobinMatches, generateTeams, generateTimeSlots } from '../utils/utils';
+import StyledButton from "@/components/StyledButton";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Toast from "react-native-toast-message";
 
-interface TournamentSetupFormProps {
-  onTournamentCreated: (tournament: Tournament) => void;
-}
-
-// Dark Red Theme Colors
 const COLORS = {
-  BACKGROUND: '#1A0505',
-  TEXT_PRIMARY: '#FFFFFF',
-  TEXT_SECONDARY: '#B89090',
-  PRIMARY: '#8B0000',
-  ACCENT: '#FF6B6B',
-  CARD_BG: 'rgba(139, 0, 0, 0.15)',
-  INPUT_BG: 'rgba(0, 0, 0, 0.3)',
-  BORDER: 'rgba(139, 0, 0, 0.5)',
-  SECTION_BORDER: 'rgba(139, 0, 0, 0.3)',
-  ERROR_BG: 'rgba(139, 0, 0, 0.3)',
+  BACKGROUND: "#1A0505",
+  TEXT_PRIMARY: "#FFFFFF",
+  TEXT_SECONDARY: "#B89090",
+  CARD_BG: "rgba(139, 0, 0, 0.15)",
+  INPUT_BG: "rgba(0, 0, 0, 0.3)",
+  BORDER: "rgba(139, 0, 0, 0.5)",
+  ACCENT: "#FF6B6B",
+  PRIMARY: "#8B0000",
+  ERROR: "#FF4D4D",
+  LIGHT_BG: "rgba(255, 255, 255, 0.08)",
 };
 
-const TournamentSetupForm: React.FC<TournamentSetupFormProps> = ({ onTournamentCreated }) => {
-  const [setupStage, setSetupStage] = useState<'input' | 'teams'>('input');
-  const [name, setName] = useState('');
-  const [numPlayers, setNumPlayers] = useState(4);
-  const [players, setPlayers] = useState<string[]>(Array(4).fill(''));
-  const [validationError, setValidationError] = useState('');
-  const [teamsGenerated, setTeamsGenerated] = useState<any[]>([]);
-  const [fadeAnim] = useState(new Animated.Value(0));
+type TournamentFormat = "singles" | "doubles";
+type Step = "setup" | "players" | "fixtures";
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [setupStage]);
+// Utility to generate a simple unique hash
+const generateHash = (length: number = 8): string => {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
 
-  useEffect(() => {
-    setPlayers((prev) => Array(numPlayers).fill('').map((_, i) => prev[i] || ''));
-  }, [numPlayers]);
+const TournamentSetupForm: React.FC = () => {
+  const [step, setStep] = useState<Step>("setup");
+  const [name, setName] = useState("");
+  const [format, setFormat] = useState<TournamentFormat>("singles");
+  const [numPlayers, setNumPlayers] = useState(2);
+  const [errors, setErrors] = useState<{ name?: string; players?: string }>({});
+  const [players, setPlayers] = useState<string[]>([]);
+  const [selectedFixture, setSelectedFixture] = useState<"wpl" | "roundrobin">("wpl");
+  const [showWPLDesc, setShowWPLDesc] = useState(false);
+  const [showRRDesc, setShowRRDesc] = useState(false);
 
-  const handlePlayerChange = (text: string, index: number) => {
-    const newPlayers = [...players];
-    newPlayers[index] = text.trim();
-    setPlayers(newPlayers);
-  };
+  const minPlayers = format === "doubles" ? 4 : 2;
+  const playerStep = format === "doubles" ? 2 : 1;
 
-  const handleCreateTeams = () => {
-    const cleanedPlayers = players.filter((p) => p !== '');
+  /** Validation for tournament name and number of players */
+  const validateSetup = () => {
+    const newErrors: { name?: string; players?: string } = {};
+
     if (!name.trim()) {
-      setValidationError('Please enter a tournament name.');
-      return;
-    }
-    if (cleanedPlayers.length < 4) {
-      setValidationError('Minimum 4 players required.');
-      return;
-    }
-    if (cleanedPlayers.length % 2 !== 0) {
-      setValidationError('Number of players must be even.');
-      return;
-    }
-    if (new Set(cleanedPlayers).size !== cleanedPlayers.length) {
-      setValidationError('Player names must be unique.');
-      return;
+      newErrors.name = "Tournament name cannot be empty.";
+    } else if (name.trim().length < 3) {
+      newErrors.name = "Name must be at least 3 characters.";
     }
 
-    setValidationError('');
-    const generatedTeams = generateTeams(cleanedPlayers);
-    setTeamsGenerated(generatedTeams);
-    setSetupStage('teams');
+    if (numPlayers < minPlayers) {
+      newErrors.players = `Minimum ${minPlayers} players required for ${format}.`;
+    } else if (format === "doubles" && numPlayers % 2 !== 0) {
+      newErrors.players = "Number of players must be even for doubles.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleScheduleFixtures = () => {
-    const teams = teamsGenerated;
-    const matches = generateRoundRobinMatches(teams);
-    const matchesPerRound = Math.floor(teams.length / 2);
-    const timeSlots = generateTimeSlots(matches.length, matchesPerRound);
+  /** Validation for players (unique & filled) */
+  const validatePlayers = () => {
+    const trimmed = players.map((p) => p.trim());
+    const hasEmpty = trimmed.some((p) => !p);
+    const hasDuplicate = new Set(trimmed).size !== trimmed.length;
 
-    const scheduledMatches = matches.map((match, index) => ({
-      ...match,
-      timeSlot: timeSlots[index],
-      court: (index % 2) + 1,
-    }));
+    if (hasEmpty) {
+      setErrors({ players: "All player names must be filled." });
+      return false;
+    }
+    if (hasDuplicate) {
+      setErrors({ players: "All player names must be unique." });
+      return false;
+    }
 
-    const newTournament: Tournament = {
-      name: name.trim(),
-      date: new Date().toISOString().split('T')[0],
-      players: teams.flatMap((t: any) => [t.player1, t.player2]),
-      teams,
-      matches: scheduledMatches,
-      currentRound: 1,
-      totalRounds: Math.ceil(matches.length / matchesPerRound),
-      format: 'round-robin',
-    };
-
-    onTournamentCreated(newTournament);
+    setErrors({});
+    return true;
   };
 
-  const renderPlayerInputs = () => {
-    return Array.from({ length: numPlayers }).map((_, index) => (
-      <View key={index} style={styles.inputWrapper}>
-        <View style={styles.playerNumber}>
-          <Text style={styles.playerNumberText}>{index + 1}</Text>
-        </View>
-        <TextInput
-          style={[
-            styles.input,
-            styles.playerInput,
-            setupStage === 'teams' && styles.disabledInput
-          ]}
-          placeholder={`Player ${index + 1} Name`}
-          placeholderTextColor={COLORS.TEXT_SECONDARY}
-          value={players[index]}
-          onChangeText={(text) => handlePlayerChange(text, index)}
-          editable={setupStage === 'input'}
-        />
-      </View>
-    ));
+  /** Save tournament and navigate */
+  const saveTournament = async () => {
+    try {
+      const tournamentId = `${name.trim().replace(/\s+/g, '_')}-${generateHash()}`;
+      const tournamentData = {
+        id: tournamentId,
+        name: name.trim(),
+        format,
+        players: players.map(p => p.trim()), // Trim all player names before saving
+        fixtureType: selectedFixture,
+        createdAt: new Date().toISOString(),
+      };
+      await AsyncStorage.setItem(tournamentId, JSON.stringify(tournamentData));
+      
+      // Show success toast
+      Toast.show({
+        type: 'success',
+        text1: 'Tournament Created!',
+        text2: `${tournamentData.name} has been saved successfully.`,
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      
+      // Use Expo Router's push method
+      router.push({
+        pathname: '/badminton/TournamentPage',
+        params: { tournamentData: JSON.stringify(tournamentData) }
+      });
+    } catch (error) {
+      console.error("Error saving tournament:", error);
+      setErrors({ players: "Failed to save tournament. Try again." });
+      
+      // Show error toast
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to save tournament. Please try again.',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
   };
 
-  if (setupStage === 'input') {
+  /** Step navigation */
+  const handleGoSetup = () => {
+    if (!validateSetup()) return;
+    setPlayers(Array.from({ length: numPlayers }, (_, i) => `Player ${i + 1}`));
+    setStep("players");
+  };
+
+  const handleGoPlayers = () => {
+    if (!validatePlayers()) return;
+    setStep("fixtures");
+  };
+
+  const handleGoFixtures = () => {
+    saveTournament();
+  };
+
+  const handleIncrement = () => setNumPlayers((prev) => prev + playerStep);
+  const handleDecrement = () =>
+    setNumPlayers((prev) => Math.max(minPlayers, prev - playerStep));
+
+  /** Step Indicator */
+  const renderStepIndicator = () => {
+    const steps: Step[] = ["setup", "players", "fixtures"];
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <View style={styles.header}>
-            <Text style={styles.headerEmoji}>🏆</Text>
-            <Text style={styles.mainTitle}>Create Tournament</Text>
-            <Text style={styles.subtitle}>Set up your badminton doubles tournament</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Tournament Name</Text>
-            <TextInput
-              style={[styles.input, styles.nameInput]}
-              placeholder="e.g. Summer Championship 2025"
-              placeholderTextColor={COLORS.TEXT_SECONDARY}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Number of Players</Text>
-            <Text style={styles.sectionHint}>Must be even, minimum 4</Text>
-            <View style={styles.stepper}>
-              <StyledButton
-                title="−"
-                onPress={() => setNumPlayers((prev) => Math.max(4, prev - 2))}
-                style={styles.stepperButton}
+      <View style={styles.stepperContainer}>
+        {steps.map((s, i) => (
+          <View key={s} style={styles.stepContainer}>
+            <View
+              style={[
+                styles.stepCircle,
+                (step === s || steps.indexOf(step) > i) && styles.activeStepCircle,
+              ]}
+            >
+              <Text style={styles.stepNumber}>{i + 1}</Text>
+            </View>
+            {i !== steps.length - 1 && (
+              <View
+                style={[styles.stepLine, steps.indexOf(step) > i && styles.activeStepLine]}
               />
-              <View style={styles.stepperValueContainer}>
-                <Text style={styles.stepperValue}>{numPlayers}</Text>
-                <Text style={styles.stepperLabel}>players</Text>
-              </View>
-              <StyledButton
-                title="+"
-                onPress={() => setNumPlayers((prev) => prev + 2)}
-                style={styles.stepperButton}
-              />
-            </View>
+            )}
           </View>
+        ))}
+      </View>
+    );
+  };
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>👥 Player Names</Text>
-            <Text style={styles.sectionHint}>Enter all player names below</Text>
-            <View style={styles.playersGrid}>
-              {renderPlayerInputs()}
-            </View>
-          </View>
+  /** Player Entry Step */
+  if (step === "players") {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {renderStepIndicator()}
+        <Text style={styles.title}>Edit Player Names</Text>
 
-          {validationError ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorIcon}>⚠️</Text>
-              <Text style={styles.error}>{validationError}</Text>
-            </View>
-          ) : null}
+        {players.map((player, idx) => (
+          <TextInput
+            key={idx}
+            style={styles.playerInput}
+            placeholder={`Player ${idx + 1}`}
+            placeholderTextColor={COLORS.TEXT_SECONDARY}
+            value={player}
+            onChangeText={(text) => {
+              const newPlayers = [...players];
+              newPlayers[idx] = text;
+              setPlayers(newPlayers);
+              // Clear error when user starts typing
+              if (errors.players) {
+                setErrors({});
+              }
+            }}
+          />
+        ))}
 
-          <View style={styles.actionButton}>
-            <StyledButton 
-              title="✨ Generate Teams" 
-              onPress={handleCreateTeams} 
-              gradient 
-            />
-          </View>
-        </Animated.View>
+        {errors.players && <Text style={styles.errorText}>{errors.players}</Text>}
+
+        <View style={styles.goButtonContainer}>
+          <StyledButton title="GO" onPress={handleGoPlayers} />
+        </View>
       </ScrollView>
     );
   }
 
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <View style={styles.header}>
-          <Text style={styles.headerEmoji}>🎯</Text>
-          <Text style={styles.mainTitle}>Teams Generated</Text>
-          <Text style={styles.subtitle}>
-            {teamsGenerated.length} teams have been randomly paired
+  /** Fixture Selection Step */
+  if (step === "fixtures") {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {renderStepIndicator()}
+        <Text style={styles.title}>Select Fixture Type</Text>
+
+        {/* WPL Option */}
+        <View style={styles.fixtureRow}>
+          <TouchableOpacity
+            style={[styles.fixtureOption, selectedFixture === "wpl" && styles.selectedFixture]}
+            onPress={() => setSelectedFixture("wpl")}
+          >
+            <Text style={styles.fixtureText}>WPL Style</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.infoIcon}
+            onPress={() => setShowWPLDesc((prev) => !prev)}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={24}
+              color={COLORS.TEXT_SECONDARY}
+            />
+          </TouchableOpacity>
+        </View>
+        {showWPLDesc && (
+          <Text style={styles.fixtureDesc}>
+            WPL style: Teams play in a league format with points-based standings. 
+            Top teams advance to playoffs/eliminations.
           </Text>
+        )}
+
+        {/* Round-robin Option */}
+        <View style={styles.fixtureRow}>
+          <TouchableOpacity
+            style={[
+              styles.fixtureOption,
+              selectedFixture === "roundrobin" && styles.selectedFixture,
+            ]}
+            onPress={() => setSelectedFixture("roundrobin")}
+          >
+            <Text style={styles.fixtureText}>Round-robin</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.infoIcon}
+            onPress={() => setShowRRDesc((prev) => !prev)}
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={24}
+              color={COLORS.TEXT_SECONDARY}
+            />
+          </TouchableOpacity>
+        </View>
+        {showRRDesc && (
+          <Text style={styles.fixtureDesc}>
+            Round-robin: Every player/team competes against every other player/team. 
+            Winner determined by total wins or points.
+          </Text>
+        )}
+
+        {errors.players && <Text style={styles.errorText}>{errors.players}</Text>}
+
+        <View style={styles.goButtonContainer}>
+          <StyledButton title="GO" onPress={handleGoFixtures} />
+        </View>
+      </ScrollView>
+    );
+  }
+
+  /** Setup Step */
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      {renderStepIndicator()}
+      <Text style={styles.title}>Create Tournament</Text>
+
+      {/* Tournament Name */}
+      <TextInput
+        style={[styles.input, errors.name ? { borderColor: COLORS.ERROR } : {}]}
+        placeholder="Tournament Name"
+        placeholderTextColor={COLORS.TEXT_SECONDARY}
+        value={name}
+        onChangeText={(text) => {
+          setName(text);
+          if (errors.name) setErrors((e) => ({ ...e, name: undefined }));
+        }}
+      />
+      {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+      {/* Format Selector */}
+      <View style={styles.formatContainer}>
+        {(["singles", "doubles"] as const).map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[styles.formatOption, format === type && styles.activeFormat]}
+            onPress={() => {
+              setFormat(type);
+              // Adjust player count when switching formats
+              if (type === "singles") {
+                // If currently even (for doubles), keep it; otherwise keep as is
+                setNumPlayers((prev) => prev);
+              } else if (type === "doubles") {
+                // Ensure even number for doubles
+                setNumPlayers((prev) => prev % 2 === 0 ? prev : prev + 1);
+              }
+              setErrors({});
+            }}
+          >
+            <Text
+              style={[styles.formatText, format === type && styles.activeFormatText]}
+            >
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Player Stepper */}
+      <View style={styles.stepper}>
+        <TouchableOpacity onPress={handleDecrement} style={styles.circleButton}>
+          <Text style={styles.circleText}>−</Text>
+        </TouchableOpacity>
+
+        <View style={styles.stepperCountBox}>
+          <Text style={styles.playerCount}>{numPlayers}</Text>
+          <Text style={styles.playerLabel}>players</Text>
         </View>
 
-        <View style={styles.teamsContainer}>
-          {teamsGenerated.map((team, index) => (
-            <TeamCard key={team.id} team={team} index={index} />
-          ))}
-        </View>
+        <TouchableOpacity onPress={handleIncrement} style={styles.circleButton}>
+          <Text style={styles.circleText}>+</Text>
+        </TouchableOpacity>
+      </View>
+      {errors.players && <Text style={styles.errorText}>{errors.players}</Text>}
 
-        <View style={styles.actionButton}>
-          <StyledButton 
-            title="📅 Schedule Fixtures" 
-            onPress={handleScheduleFixtures} 
-            gradient 
-          />
-        </View>
-      </Animated.View>
+      <View style={styles.goButtonContainer}>
+        <StyledButton title="GO" onPress={handleGoSetup} />
+      </View>
     </ScrollView>
   );
 };
 
+/** Styles */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+  container: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
+    paddingBottom: 100,
   },
-  scrollContent: { 
-    padding: 20, 
-    paddingBottom: 120,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
-    paddingTop: 8,
-  },
-  headerEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  mainTitle: {
-    fontSize: 28,
-    marginBottom: 8,
-    fontWeight: 'bold',
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
     color: COLORS.TEXT_PRIMARY,
-    textAlign: 'center',
-    textShadowColor: 'rgba(139, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: COLORS.TEXT_SECONDARY,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  section: {
-    marginBottom: 28,
-    backgroundColor: COLORS.CARD_BG,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.SECTION_BORDER,
-  },
-  sectionLabel: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: 6,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  sectionHint: {
-    fontSize: 13,
-    color: COLORS.TEXT_SECONDARY,
-    marginBottom: 12,
+    fontFamily: "ConcertOne_400Regular",
+    marginBottom: 20,
+    textAlign: "center",
   },
   input: {
     backgroundColor: COLORS.INPUT_BG,
@@ -285,105 +387,143 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 16,
     color: COLORS.TEXT_PRIMARY,
-    marginVertical: 6,
+    marginBottom: 20,
   },
-  nameInput: {
-    fontSize: 16,
+  formatContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 14,
+    marginBottom: 20,
   },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    backgroundColor: COLORS.INPUT_BG,
-    borderRadius: 16,
-    padding: 16,
+  formatOption: {
+    flex: 1,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: 'rgba(139, 0, 0, 0.4)',
+    borderColor: COLORS.BORDER,
+    borderRadius: 12,
+    backgroundColor: COLORS.LIGHT_BG,
+    alignItems: "center",
   },
-  stepperButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.PRIMARY,
-    elevation: 4,
-    shadowColor: COLORS.PRIMARY,
+  activeFormat: { backgroundColor: COLORS.PRIMARY, borderColor: COLORS.ACCENT },
+  formatText: { fontSize: 18, fontWeight: "600", color: COLORS.TEXT_SECONDARY },
+  activeFormatText: { color: COLORS.TEXT_PRIMARY },
+  stepper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.CARD_BG,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
+    elevation: 3,
   },
-  stepperValueContainer: {
-    alignItems: 'center',
-    marginHorizontal: 24,
+  circleButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: COLORS.PRIMARY,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: COLORS.ACCENT,
   },
-  stepperValue: {
+  circleText: {
     fontSize: 32,
-    fontWeight: 'bold',
+    color: COLORS.TEXT_PRIMARY,
+    fontWeight: "bold",
+    lineHeight: 32,
+  },
+  stepperCountBox: {
+    alignItems: "center",
+    marginHorizontal: 32,
+  },
+  playerCount: {
+    fontSize: 38,
+    fontWeight: "bold",
     color: COLORS.ACCENT,
   },
-  stepperLabel: {
-    fontSize: 12,
+  playerLabel: {
+    fontSize: 14,
     color: COLORS.TEXT_SECONDARY,
     marginTop: 2,
   },
-  playersGrid: {
-    gap: 12,
+  goButtonContainer: {
+    marginTop: 20,
+    alignItems: "flex-end",
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  playerNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.PRIMARY,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  playerNumberText: {
-    color: COLORS.TEXT_PRIMARY,
-    fontWeight: '700',
+  errorText: {
+    color: COLORS.ERROR,
     fontSize: 14,
+    textAlign: "center",
+    marginVertical: 6,
   },
   playerInput: {
+    padding: 4,
+    fontSize: 30,
+    fontFamily: "ConcertOne_400Regular",
+    color: COLORS.TEXT_PRIMARY,
+    marginBottom: 12,
+  },
+  stepperContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  stepContainer: { flexDirection: "row", alignItems: "center" },
+  stepCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.LIGHT_BG,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activeStepCircle: { backgroundColor: COLORS.PRIMARY },
+  stepNumber: { color: COLORS.TEXT_PRIMARY, fontWeight: "bold" },
+  stepLine: { width: 40, height: 2, backgroundColor: COLORS.LIGHT_BG },
+  activeStepLine: { backgroundColor: COLORS.ACCENT },
+  fixtureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 10,
+  },
+  fixtureOption: {
     flex: 1,
-    marginVertical: 0,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.ERROR_BG,
+    padding: 14,
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    gap: 8,
+    backgroundColor: COLORS.LIGHT_BG,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  selectedFixture: {
+    backgroundColor: COLORS.PRIMARY,
     borderWidth: 1,
-    borderColor: COLORS.PRIMARY,
+    borderColor: COLORS.ACCENT,
   },
-  errorIcon: {
-    fontSize: 20,
+  fixtureText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.TEXT_PRIMARY,
   },
-  error: {
-    color: COLORS.ACCENT,
+  infoIcon: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fixtureDesc: {
+    color: COLORS.TEXT_SECONDARY,
     fontSize: 14,
-    fontWeight: '600',
-  },
-  teamsContainer: {
-    marginVertical: 16,
-    gap: 12,
-  },
-  disabledInput: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    opacity: 0.6,
-  },
-  actionButton: {
-    marginTop: 8,
-    marginBottom: 20,
+    textAlign: "center",
+    marginBottom: 12,
+    paddingHorizontal: 10,
   },
 });
 

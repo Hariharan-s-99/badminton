@@ -21,21 +21,25 @@ const BLENDED_WINZZ_GRADIENT = {
     "#32070D",
     "#190305",
     "#000000",
-  ] as [string, string, ...string[]],  // colors tuple
-  locations: [
-    0, 0.05, 0.1, 0.25, 0.4, 0.6, 0.75, 0.9, 1,
-  ] as [number, number, ...number[]],    // locations tuple
+  ] as [string, string, ...string[]], // colors tuple
+  locations: [0, 0.05, 0.1, 0.25, 0.4, 0.6, 0.75, 0.9, 1] as [
+    number,
+    number,
+    ...number[]
+  ], // locations tuple
 };
 
 type Props = PropsWithChildren<{
   backgroundImage?: any;
   overrideGradient?: boolean;
+  winzzLogo?: boolean;
 }>;
 
-export default function ParallaxScrollView({ 
-  children, 
-  backgroundImage, 
-  overrideGradient = false
+export default function ParallaxScrollView({
+  children,
+  backgroundImage,
+  overrideGradient = false,
+  winzzLogo = true,
 }: Props) {
   const scrollY = useSharedValue(0);
 
@@ -49,13 +53,13 @@ export default function ParallaxScrollView({
     <View style={styles.container}>
       {/* Fixed background image */}
       {backgroundImage && (
-        <Image 
+        <Image
           source={backgroundImage}
           style={styles.backgroundImageFixed}
           contentFit="cover"
           cachePolicy="memory-disk"
-          onLoad={() => console.log('Background image loaded')}
-          onError={(error) => console.log('Background image error:', error)}
+          onLoad={() => console.log("Background image loaded")}
+          onError={(error) => console.log("Background image error:", error)}
         />
       )}
 
@@ -70,6 +74,14 @@ export default function ParallaxScrollView({
       >
         {/* Content Area */}
         <View style={styles.content}>
+          {winzzLogo && (
+            <Image
+              source={require("../assets/images/winzz_logo.svg")}
+              style={styles.logo}
+              contentFit="cover"
+              contentPosition="top center"
+            />
+          )}
           {children}
         </View>
       </Animated.ScrollView>
@@ -109,6 +121,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     marginTop: 0,
+  },
+  logo: {
+    width: "100%",
+    aspectRatio: 498 / 142,
+    alignSelf: "center",
   },
 });
 
