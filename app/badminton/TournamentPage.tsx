@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 const COLORS = {
   BACKGROUND: "#1A0505",
@@ -41,54 +41,59 @@ const TournamentPage: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: tournament.name }} />
+    // <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    //   <Stack.Screen options={{ title: tournament.name }} />
       
-      <Text style={styles.title}>{tournament.name}</Text>
+    //   <Text style={styles.title}>{tournament.name}</Text>
       
-      <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Tournament ID:</Text>
-        <Text style={styles.infoText}>{tournament.id}</Text>
-      </View>
+    //   <View style={styles.infoCard}>
+    //     <Text style={styles.infoLabel}>Tournament ID:</Text>
+    //     <Text style={styles.infoText}>{tournament.id}</Text>
+    //   </View>
       
-      <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Format:</Text>
-        <Text style={styles.infoText}>
-          {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)}
-        </Text>
-      </View>
+    //   <View style={styles.infoCard}>
+    //     <Text style={styles.infoLabel}>Format:</Text>
+    //     <Text style={styles.infoText}>
+    //       {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)}
+    //     </Text>
+    //   </View>
       
-      <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Fixture Type:</Text>
-        <Text style={styles.infoText}>
-          {tournament.fixtureType === "wpl" ? "WPL Style" : "Round-robin"}
-        </Text>
-      </View>
+    //   <View style={styles.infoCard}>
+    //     <Text style={styles.infoLabel}>Fixture Type:</Text>
+    //     <Text style={styles.infoText}>
+    //       {tournament.fixtureType === "wpl" ? "WPL Style" : "Round-robin"}
+    //     </Text>
+    //   </View>
       
-      <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Players ({tournament.players?.length || 0}):</Text>
-        {tournament.players && tournament.players.length > 0 ? (
-          tournament.players.map((player: string, index: number) => (
-            <Text key={`player-${index}`} style={styles.infoText}>
-              {index + 1}. {player}
-            </Text>
-          ))
-        ) : (
-          <Text style={styles.infoText}>No players added</Text>
-        )}
-      </View>
+    //   <View style={styles.infoCard}>
+    //     <Text style={styles.infoLabel}>Players ({tournament.players?.length || 0}):</Text>
+    //     {tournament.players && tournament.players.length > 0 ? (
+    //       tournament.players.map((player: string, index: number) => (
+    //         <Text key={`player-${index}`} style={styles.infoText}>
+    //           {index + 1}. {player}
+    //         </Text>
+    //       ))
+    //     ) : (
+    //       <Text style={styles.infoText}>No players added</Text>
+    //     )}
+    //   </View>
 
-      {tournament.createdAt && (
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Created:</Text>
-          <Text style={styles.infoText}>
-            {new Date(tournament.createdAt).toLocaleDateString()} at{" "}
-            {new Date(tournament.createdAt).toLocaleTimeString()}
-          </Text>
-        </View>
-      )}
-    </ScrollView>
-  );
+    //   {tournament.createdAt && (
+    //     <View style={styles.infoCard}>
+    //       <Text style={styles.infoLabel}>Created:</Text>
+    //       <Text style={styles.infoText}>
+    //         {new Date(tournament.createdAt).toLocaleDateString()} at{" "}
+    //         {new Date(tournament.createdAt).toLocaleTimeString()}
+    //       </Text>
+    //     </View>
+    //   )}
+    // </ScrollView>
+    <View>
+        <Text>
+            Till now ithu varaikum finish pannirukn fixtures table and standings nalaiku finish pannikrn.Bye
+        </Text>
+    </View>
+    );
 };
 
 const styles = StyleSheet.create({
