@@ -1,6 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -57,7 +56,7 @@ export default function SportSelection() {
   const handleSportPress = (sport: Sport) => {
     if (sport.id === "badminton") {
       console.log(`Selected sport: ${sport.name}`);
-      router.push("./badminton");
+      router.push("./badmintonKickStart");
     } else {
       console.log(`${sport.name} is locked - Coming Soon!`);
     }

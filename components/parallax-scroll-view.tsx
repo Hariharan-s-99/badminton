@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import type { PropsWithChildren } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -50,7 +50,11 @@ export default function ParallaxScrollView({
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.selectContent}
+    >
+      {/* <View style={styles.container}> */}
       {/* Fixed background image */}
       {backgroundImage && (
         <Image
@@ -85,7 +89,7 @@ export default function ParallaxScrollView({
           {children}
         </View>
       </Animated.ScrollView>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -126,6 +130,11 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 498 / 142,
     alignSelf: "center",
+  },
+  selectContent: {
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: 40,
   },
 });
 

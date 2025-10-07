@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import TournamentSetupForm from "./TournamentSetupForm";
+import CreateTournament from "./CreateTournament";
 
 // Dark Red Theme Colors
 const COLORS = {
@@ -32,7 +32,7 @@ export default function TournamentScreen() {
         backgroundImage={require("../../assets/images/badmintonBack.svg")}
       >
         <View style={styles.content}>
-          <TournamentSetupForm />
+          <CreateTournament />
         </View>
       </ParallaxScrollView>
       <Toast />

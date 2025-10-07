@@ -5,12 +5,11 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -121,7 +120,7 @@ const TournamentSetupForm: React.FC = () => {
     
     // Navigate to TournamentPage
     router.push({
-      pathname: '/badminton/TournamentPage',
+      pathname: '/badminton/TournamentFixtures',
       params: { tournamentData: JSON.stringify(tournament) }
     });
   };
@@ -214,7 +213,7 @@ const TournamentSetupForm: React.FC = () => {
       
       // Use Expo Router's push method
       router.push({
-        pathname: '/badminton/TournamentPage',
+        pathname: '/badminton/TournamentFixtures',
         params: { tournamentData: JSON.stringify(tournamentData) }
       });
     } catch (error) {
@@ -283,7 +282,7 @@ const TournamentSetupForm: React.FC = () => {
   /** Select Tournament Step */
   if (step === "select") {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.selectContent}>
+      <View style={styles.container} >
         <Text style={styles.title}>Tournaments</Text>
         <Text style={styles.subtitle}>Continue or create a new tournament</Text>
 
@@ -346,14 +345,14 @@ const TournamentSetupForm: React.FC = () => {
             )}
           </>
         )}
-      </ScrollView>
+      </View>
     );
   }
 
   /** Player Entry Step */
   if (step === "players") {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.container}>
         {renderStepIndicator()}
         <Text style={styles.title}>Edit Player Names</Text>
 
@@ -381,14 +380,14 @@ const TournamentSetupForm: React.FC = () => {
         <View style={styles.goButtonContainer}>
           <StyledButton title="GO" onPress={handleGoPlayers} />
         </View>
-      </ScrollView>
+      </View>
     );
   }
 
   /** Fixture Selection Step */
   if (step === "fixtures") {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.container}>
         {renderStepIndicator()}
         <Text style={styles.title}>Select Fixture Type</Text>
 
@@ -452,16 +451,14 @@ const TournamentSetupForm: React.FC = () => {
         <View style={styles.goButtonContainer}>
           <StyledButton title="GO" onPress={handleGoFixtures} />
         </View>
-      </ScrollView>
+      </View>
     );
   }
 
   /** Setup Step */
   return (
-    <ScrollView
+    <View
       style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
     >
       {renderStepIndicator()}
       <Text style={styles.title}>Create Tournament</Text>
@@ -527,19 +524,13 @@ const TournamentSetupForm: React.FC = () => {
       <View style={styles.goButtonContainer}>
         <StyledButton title="GO" onPress={handleGoSetup} />
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
 /** Styles */
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
-    paddingBottom: 100,
-  },
   title: {
     fontSize: 30,
     fontWeight: "bold",
