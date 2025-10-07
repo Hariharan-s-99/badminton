@@ -5,11 +5,12 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -41,7 +42,8 @@ interface SavedTournament {
 
 // Utility to generate a simple unique hash
 const generateHash = (length: number = 8): string => {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -56,12 +58,18 @@ const TournamentSetupForm: React.FC = () => {
   const [numPlayers, setNumPlayers] = useState(2);
   const [errors, setErrors] = useState<{ name?: string; players?: string }>({});
   const [players, setPlayers] = useState<string[]>([]);
-  const [selectedFixture, setSelectedFixture] = useState<"wpl" | "roundrobin">("wpl");
+  const [selectedFixture, setSelectedFixture] = useState<"wpl" | "roundrobin">(
+    "wpl"
+  );
   const [showWPLDesc, setShowWPLDesc] = useState(false);
   const [showRRDesc, setShowRRDesc] = useState(false);
-  const [savedTournaments, setSavedTournaments] = useState<SavedTournament[]>([]);
+  const [savedTournaments, setSavedTournaments] = useState<SavedTournament[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
+  const [selectedTournamentId, setSelectedTournamentId] = useState<
+    string | null
+  >(null);
 
   const minPlayers = format === "doubles" ? 4 : 2;
   const playerStep = format === "doubles" ? 2 : 1;
@@ -75,8 +83,10 @@ const TournamentSetupForm: React.FC = () => {
     try {
       setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
-      const tournamentKeys = keys.filter(key => key.includes('-') && key.length > 10);
-      
+      const tournamentKeys = keys.filter(
+        (key) => key.includes("-") && key.length > 10
+      );
+
       const tournaments: SavedTournament[] = [];
       for (const key of tournamentKeys) {
         const data = await AsyncStorage.getItem(key);
@@ -88,12 +98,13 @@ const TournamentSetupForm: React.FC = () => {
           }
         }
       }
-      
+
       // Sort by most recent
-      tournaments.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      tournaments.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-      
+
       setSavedTournaments(tournaments);
     } catch (error) {
       console.error("Error loading tournaments:", error);
@@ -109,41 +120,41 @@ const TournamentSetupForm: React.FC = () => {
     setPlayers(tournament.players);
     setNumPlayers(tournament.players.length);
     setSelectedFixture(tournament.fixtureType);
-    
+
     Toast.show({
-      type: 'info',
-      text1: 'Tournament Loaded',
+      type: "info",
+      text1: "Tournament Loaded",
       text2: `Continue with ${tournament.name}`,
-      position: 'top',
+      position: "top",
       visibilityTime: 2000,
     });
-    
+
     // Navigate to TournamentPage
     router.push({
-      pathname: '/badminton/TournamentFixtures',
-      params: { tournamentData: JSON.stringify(tournament) }
+      pathname: "/badminton/TournamentFixtures",
+      params: { tournamentData: JSON.stringify(tournament) },
     });
   };
 
   const deleteTournament = async (tournamentId: string) => {
     try {
       await AsyncStorage.removeItem(tournamentId);
-      setSavedTournaments(prev => prev.filter(t => t.id !== tournamentId));
-      
+      setSavedTournaments((prev) => prev.filter((t) => t.id !== tournamentId));
+
       Toast.show({
-        type: 'success',
-        text1: 'Deleted',
-        text2: 'Tournament removed successfully',
-        position: 'top',
+        type: "success",
+        text1: "Deleted",
+        text2: "Tournament removed successfully",
+        position: "top",
         visibilityTime: 2000,
       });
     } catch (error) {
       console.error("Error deleting tournament:", error);
       Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to delete tournament',
-        position: 'top',
+        type: "error",
+        text1: "Error",
+        text2: "Failed to delete tournament",
+        position: "top",
         visibilityTime: 2000,
       });
     }
@@ -191,41 +202,43 @@ const TournamentSetupForm: React.FC = () => {
   /** Save tournament and navigate */
   const saveTournament = async () => {
     try {
-      const tournamentId = `${name.trim().replace(/\s+/g, '_')}-${generateHash()}`;
+      const tournamentId = `${name
+        .trim()
+        .replace(/\s+/g, "_")}-${generateHash()}`;
       const tournamentData = {
         id: tournamentId,
         name: name.trim(),
         format,
-        players: players.map(p => p.trim()), // Trim all player names before saving
+        players: players.map((p) => p.trim()), // Trim all player names before saving
         fixtureType: selectedFixture,
         createdAt: new Date().toISOString(),
       };
       await AsyncStorage.setItem(tournamentId, JSON.stringify(tournamentData));
-      
+
       // Show success toast
       Toast.show({
-        type: 'success',
-        text1: 'Tournament Created!',
+        type: "success",
+        text1: "Tournament Created!",
         text2: `${tournamentData.name} has been saved successfully.`,
-        position: 'top',
+        position: "top",
         visibilityTime: 3000,
       });
-      
+
       // Use Expo Router's push method
       router.push({
-        pathname: '/badminton/TournamentFixtures',
-        params: { tournamentData: JSON.stringify(tournamentData) }
+        pathname: "/badminton/TournamentFixtures",
+        params: { tournamentData: JSON.stringify(tournamentData) },
       });
     } catch (error) {
       console.error("Error saving tournament:", error);
       setErrors({ players: "Failed to save tournament. Try again." });
-      
+
       // Show error toast
       Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to save tournament. Please try again.',
-        position: 'top',
+        type: "error",
+        text1: "Error",
+        text2: "Failed to save tournament. Please try again.",
+        position: "top",
         visibilityTime: 3000,
       });
     }
@@ -255,7 +268,7 @@ const TournamentSetupForm: React.FC = () => {
   const renderStepIndicator = () => {
     const steps: Step[] = ["select", "setup", "players", "fixtures"];
     const currentIndex = steps.indexOf(step);
-    
+
     return (
       <View style={styles.stepperContainer}>
         {steps.slice(1).map((s, i) => (
@@ -270,7 +283,10 @@ const TournamentSetupForm: React.FC = () => {
             </View>
             {i !== steps.length - 2 && (
               <View
-                style={[styles.stepLine, currentIndex > i + 1 && styles.activeStepLine]}
+                style={[
+                  styles.stepLine,
+                  currentIndex > i + 1 && styles.activeStepLine,
+                ]}
               />
             )}
           </View>
@@ -282,10 +298,13 @@ const TournamentSetupForm: React.FC = () => {
   /** Select Tournament Step */
   if (step === "select") {
     return (
-      <View style={styles.container} >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Tournaments</Text>
         <Text style={styles.subtitle}>Continue or create a new tournament</Text>
-
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.ACCENT} />
@@ -304,17 +323,23 @@ const TournamentSetupForm: React.FC = () => {
                       onPress={() => loadTournament(tournament)}
                     >
                       <View style={styles.tournamentHeader}>
-                        <Text style={styles.tournamentName}>{tournament.name}</Text>
+                        <Text style={styles.tournamentName}>
+                          {tournament.name}
+                        </Text>
                         <Text style={styles.tournamentDate}>
                           {new Date(tournament.createdAt).toLocaleDateString()}
                         </Text>
                       </View>
                       <View style={styles.tournamentDetails}>
                         <Text style={styles.tournamentMeta}>
-                          {tournament.format.charAt(0).toUpperCase() + tournament.format.slice(1)} • {tournament.players.length} players
+                          {tournament.format.charAt(0).toUpperCase() +
+                            tournament.format.slice(1)}{" "}
+                          • {tournament.players.length} players
                         </Text>
                         <Text style={styles.tournamentMeta}>
-                          {tournament.fixtureType === "wpl" ? "WPL Style" : "Round-robin"}
+                          {tournament.fixtureType === "wpl"
+                            ? "WPL Style"
+                            : "Round-robin"}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -322,7 +347,11 @@ const TournamentSetupForm: React.FC = () => {
                       style={styles.deleteButton}
                       onPress={() => deleteTournament(tournament.id)}
                     >
-                      <Ionicons name="trash-outline" size={20} color={COLORS.ERROR} />
+                      <Ionicons
+                        name="trash-outline"
+                        size={20}
+                        color={COLORS.ERROR}
+                      />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -334,7 +363,11 @@ const TournamentSetupForm: React.FC = () => {
               style={styles.createNewButton}
               onPress={() => setStep("setup")}
             >
-              <Ionicons name="add-circle-outline" size={32} color={COLORS.ACCENT} />
+              <Ionicons
+                name="add-circle-outline"
+                size={32}
+                color={COLORS.ACCENT}
+              />
               <Text style={styles.createNewText}>Create New Tournament</Text>
             </TouchableOpacity>
 
@@ -345,14 +378,18 @@ const TournamentSetupForm: React.FC = () => {
             )}
           </>
         )}
-      </View>
+      </ScrollView>
     );
   }
 
   /** Player Entry Step */
   if (step === "players") {
     return (
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {renderStepIndicator()}
         <Text style={styles.title}>Edit Player Names</Text>
 
@@ -375,26 +412,35 @@ const TournamentSetupForm: React.FC = () => {
           />
         ))}
 
-        {errors.players && <Text style={styles.errorText}>{errors.players}</Text>}
+        {errors.players && (
+          <Text style={styles.errorText}>{errors.players}</Text>
+        )}
 
         <View style={styles.goButtonContainer}>
           <StyledButton title="GO" onPress={handleGoPlayers} />
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
   /** Fixture Selection Step */
   if (step === "fixtures") {
     return (
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {renderStepIndicator()}
         <Text style={styles.title}>Select Fixture Type</Text>
 
         {/* WPL Option */}
         <View style={styles.fixtureRow}>
           <TouchableOpacity
-            style={[styles.fixtureOption, selectedFixture === "wpl" && styles.selectedFixture]}
+            style={[
+              styles.fixtureOption,
+              selectedFixture === "wpl" && styles.selectedFixture,
+            ]}
             onPress={() => setSelectedFixture("wpl")}
           >
             <Text style={styles.fixtureText}>WPL Style</Text>
@@ -412,8 +458,8 @@ const TournamentSetupForm: React.FC = () => {
         </View>
         {showWPLDesc && (
           <Text style={styles.fixtureDesc}>
-            WPL style: Teams play in a league format with points-based standings. 
-            Top teams advance to playoffs/eliminations.
+            WPL style: Teams play in a league format with points-based
+            standings. Top teams advance to playoffs/eliminations.
           </Text>
         )}
 
@@ -441,24 +487,28 @@ const TournamentSetupForm: React.FC = () => {
         </View>
         {showRRDesc && (
           <Text style={styles.fixtureDesc}>
-            Round-robin: Every player/team competes against every other player/team. 
-            Winner determined by total wins or points.
+            Round-robin: Every player/team competes against every other
+            player/team. Winner determined by total wins or points.
           </Text>
         )}
 
-        {errors.players && <Text style={styles.errorText}>{errors.players}</Text>}
+        {errors.players && (
+          <Text style={styles.errorText}>{errors.players}</Text>
+        )}
 
         <View style={styles.goButtonContainer}>
           <StyledButton title="GO" onPress={handleGoFixtures} />
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
   /** Setup Step */
   return (
-    <View
-      style={styles.container}
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
     >
       {renderStepIndicator()}
       <Text style={styles.title}>Create Tournament</Text>
@@ -481,7 +531,10 @@ const TournamentSetupForm: React.FC = () => {
         {(["singles", "doubles"] as const).map((type) => (
           <TouchableOpacity
             key={type}
-            style={[styles.formatOption, format === type && styles.activeFormat]}
+            style={[
+              styles.formatOption,
+              format === type && styles.activeFormat,
+            ]}
             onPress={() => {
               setFormat(type);
               // Adjust player count when switching formats
@@ -490,13 +543,16 @@ const TournamentSetupForm: React.FC = () => {
                 setNumPlayers((prev) => prev);
               } else if (type === "doubles") {
                 // Ensure even number for doubles
-                setNumPlayers((prev) => prev % 2 === 0 ? prev : prev + 1);
+                setNumPlayers((prev) => (prev % 2 === 0 ? prev : prev + 1));
               }
               setErrors({});
             }}
           >
             <Text
-              style={[styles.formatText, format === type && styles.activeFormatText]}
+              style={[
+                styles.formatText,
+                format === type && styles.activeFormatText,
+              ]}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </Text>
@@ -524,13 +580,19 @@ const TournamentSetupForm: React.FC = () => {
       <View style={styles.goButtonContainer}>
         <StyledButton title="GO" onPress={handleGoSetup} />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 /** Styles */
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
+    paddingBottom: 100,
+  },
   title: {
     fontSize: 30,
     fontWeight: "bold",
@@ -783,6 +845,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 12,
     fontStyle: "italic",
+  },
+  contentContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  scrollView: {
+    flex: 1,
   },
 });
 
