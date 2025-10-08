@@ -1,3 +1,4 @@
+// SYNCHRONIZED CreateTournament.tsx
 import StyledButton from "@/components/StyledButton";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -40,6 +41,10 @@ interface SavedTournament {
   isComplete?: boolean;
 }
 
+// STORAGE KEYS - must match TournamentPage
+const TOURNAMENT_KEY_PREFIX = 'tournament_';
+const PROGRESS_KEY_PREFIX = 'tournament_progress_';
+
 // Utility to generate a simple unique hash
 const generateHash = (length: number = 8): string => {
   const characters =
@@ -59,7 +64,7 @@ const TournamentSetupForm: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; players?: string }>({});
   const [players, setPlayers] = useState<string[]>([]);
   const [selectedFixture, setSelectedFixture] = useState<"wpl" | "roundrobin">(
-    "wpl"
+    "roundrobin"
   );
   const [showWPLDesc, setShowWPLDesc] = useState(false);
   const [showRRDesc, setShowRRDesc] = useState(false);
@@ -67,9 +72,6 @@ const TournamentSetupForm: React.FC = () => {
     []
   );
   const [loading, setLoading] = useState(true);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<
-    string | null
-  >(null);
 
   const minPlayers = format === "doubles" ? 4 : 2;
   const playerStep = format === "doubles" ? 2 : 1;
@@ -83,18 +85,23 @@ const TournamentSetupForm: React.FC = () => {
     try {
       setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
+      // Look for keys that start with 'tournament_' prefix
       const tournamentKeys = keys.filter(
-        (key) => key.includes("-") && key.length > 10
+        (key) => key.startsWith(TOURNAMENT_KEY_PREFIX) && !key.includes('_progress_')
       );
 
       const tournaments: SavedTournament[] = [];
       for (const key of tournamentKeys) {
         const data = await AsyncStorage.getItem(key);
         if (data) {
-          const tournament = JSON.parse(data);
-          // Only show incomplete tournaments
-          if (!tournament.isComplete) {
-            tournaments.push(tournament);
+          try {
+            const tournament = JSON.parse(data);
+            // Validate tournament structure
+            if (tournament.id && tournament.name && tournament.format && tournament.players) {
+              tournaments.push(tournament);
+            }
+          } catch (e) {
+            console.error('Error parsing tournament:', key, e);
           }
         }
       }
@@ -114,13 +121,6 @@ const TournamentSetupForm: React.FC = () => {
   };
 
   const loadTournament = (tournament: SavedTournament) => {
-    setSelectedTournamentId(tournament.id);
-    setName(tournament.name);
-    setFormat(tournament.format);
-    setPlayers(tournament.players);
-    setNumPlayers(tournament.players.length);
-    setSelectedFixture(tournament.fixtureType);
-
     Toast.show({
       type: "info",
       text1: "Tournament Loaded",
@@ -129,16 +129,22 @@ const TournamentSetupForm: React.FC = () => {
       visibilityTime: 2000,
     });
 
-    // Navigate to TournamentPage
+    // Navigate to TournamentPage with tournament data
     router.push({
       pathname: "/badminton/TournamentFixtures",
-      params: { tournamentData: JSON.stringify(tournament), id: tournament.id },
+      params: { 
+        tournamentData: JSON.stringify(tournament), 
+        id: tournament.id 
+      },
     });
   };
 
   const deleteTournament = async (tournamentId: string) => {
     try {
+      // Delete both tournament data and progress data
       await AsyncStorage.removeItem(tournamentId);
+      await AsyncStorage.removeItem(`${PROGRESS_KEY_PREFIX}${tournamentId}`);
+      
       setSavedTournaments((prev) => prev.filter((t) => t.id !== tournamentId));
 
       Toast.show({
@@ -202,17 +208,21 @@ const TournamentSetupForm: React.FC = () => {
   /** Save tournament and navigate */
   const saveTournament = async () => {
     try {
-      const tournamentId = `${name
+      // Generate tournament ID with consistent format
+      const tournamentId = `${TOURNAMENT_KEY_PREFIX}${name
         .trim()
-        .replace(/\s+/g, "_")}-${generateHash()}`;
-      const tournamentData = {
+        .replace(/\s+/g, "_")}_${Date.now()}_${generateHash(6)}`;
+      
+      const tournamentData: SavedTournament = {
         id: tournamentId,
         name: name.trim(),
         format,
-        players: players.map((p) => p.trim()), // Trim all player names before saving
+        players: players.map((p) => p.trim()),
         fixtureType: selectedFixture,
         createdAt: new Date().toISOString(),
       };
+      
+      // Save tournament metadata
       await AsyncStorage.setItem(tournamentId, JSON.stringify(tournamentData));
 
       // Show success toast
@@ -224,16 +234,18 @@ const TournamentSetupForm: React.FC = () => {
         visibilityTime: 3000,
       });
 
-      // Use Expo Router's push method
+      // Navigate with both tournamentData and id
       router.push({
         pathname: "/badminton/TournamentFixtures",
-        params: { tournamentData: JSON.stringify(tournamentData) },
+        params: { 
+          tournamentData: JSON.stringify(tournamentData),
+          id: tournamentId 
+        },
       });
     } catch (error) {
       console.error("Error saving tournament:", error);
       setErrors({ players: "Failed to save tournament. Try again." });
 
-      // Show error toast
       Toast.show({
         type: "error",
         text1: "Error",
@@ -315,7 +327,7 @@ const TournamentSetupForm: React.FC = () => {
             {/* Saved Tournaments */}
             {savedTournaments.length > 0 && (
               <View style={styles.savedSection}>
-                <Text style={styles.sectionTitle}>Incomplete Tournaments</Text>
+                <Text style={styles.sectionTitle}>Saved Tournaments</Text>
                 {savedTournaments.map((tournament) => (
                   <View key={tournament.id} style={styles.tournamentCard}>
                     <TouchableOpacity
@@ -373,7 +385,7 @@ const TournamentSetupForm: React.FC = () => {
 
             {savedTournaments.length === 0 && (
               <Text style={styles.emptyText}>
-                No incomplete tournaments. Start by creating a new one!
+                No tournaments yet. Start by creating a new one!
               </Text>
             )}
           </>
@@ -404,7 +416,6 @@ const TournamentSetupForm: React.FC = () => {
               const newPlayers = [...players];
               newPlayers[idx] = text;
               setPlayers(newPlayers);
-              // Clear error when user starts typing
               if (errors.players) {
                 setErrors({});
               }
@@ -537,12 +548,9 @@ const TournamentSetupForm: React.FC = () => {
             ]}
             onPress={() => {
               setFormat(type);
-              // Adjust player count when switching formats
               if (type === "singles") {
-                // If currently even (for doubles), keep it; otherwise keep as is
                 setNumPlayers((prev) => prev);
               } else if (type === "doubles") {
-                // Ensure even number for doubles
                 setNumPlayers((prev) => (prev % 2 === 0 ? prev : prev + 1));
               }
               setErrors({});
@@ -747,7 +755,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 10,
   },
-  // Selection Step Styles
   selectContent: {
     flexGrow: 1,
     padding: 20,

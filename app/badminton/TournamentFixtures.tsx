@@ -1,5 +1,6 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationProp } from "@react-navigation/native";
 import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -39,15 +40,15 @@ interface TournamentData {
   id: string;
   name: string;
   format: "singles" | "doubles";
-  players: string[]; // List of actual player names
+  players: string[];
   fixtureType: "wpl" | "roundrobin";
   createdAt?: string;
 }
 
 interface Match {
   id: string;
-  teamA: string; // Team name
-  teamB: string; // Team name
+  teamA: string;
+  teamB: string;
   scoreA: number | null;
   scoreB: number | null;
   completed: boolean;
@@ -56,6 +57,12 @@ interface Match {
 interface TeamDetail {
   teamName: string;
   players: string[];
+}
+
+interface StoredTournamentData {
+  matches: Match[];
+  teamDetails: TeamDetail[];
+  lastUpdated: string;
 }
 
 type Tab = "fixtures" | "points" | "teams";
@@ -78,6 +85,9 @@ const TEAM_NAMES = [
   "Hot Shots",
 ];
 
+// Storage key prefix
+const STORAGE_KEY_PREFIX = 'tournament_progress_';
+
 // Fisher-Yates shuffle algorithm for better randomization
 const shuffleArray = <T,>(array: T[]): T[] => {
   const shuffled = [...array];
@@ -95,6 +105,7 @@ const TournamentPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("fixtures");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storedTeamDetails, setStoredTeamDetails] = useState<TeamDetail[]>([]);
 
   // Parse tournament data with validation
   const tournament: TournamentData | null = useMemo(() => {
@@ -113,43 +124,89 @@ const TournamentPage: React.FC = () => {
     return null;
   }, [params.tournamentData]);
 
-  // Generate shuffled team details
-  const teamDetails: TeamDetail[] = useMemo(() => {
-    if (!tournament) return [];
+  // Storage functions
+  const getStorageKey = (tournamentId: string) => {
+    return `${STORAGE_KEY_PREFIX}${tournamentId}`;
+  };
 
-    if (tournament.format === "singles") {
-      // For singles, each player is their own team with a team name
-      const shuffledPlayers = shuffleArray(tournament.players);
-      const availableTeamNames = shuffleArray([...TEAM_NAMES]);
-      
-      return shuffledPlayers.map((player, index) => ({
-        teamName: availableTeamNames[index] || `Team ${index + 1}`,
-        players: [player],
-      }));
-    } else {
-      // For doubles, shuffle players and pair them up
-      const shuffledPlayers = shuffleArray(tournament.players);
-      const teams: TeamDetail[] = [];
-      const availableTeamNames = shuffleArray([...TEAM_NAMES]);
-      
-      // Create pairs of players
-      for (let i = 0; i < shuffledPlayers.length; i += 2) {
-        if (i + 1 < shuffledPlayers.length) {
-          teams.push({
-            teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
-            players: [shuffledPlayers[i], shuffledPlayers[i + 1]],
-          });
-        } else {
-          // If odd number of players, last player gets a team alone
-          teams.push({
-            teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
-            players: [shuffledPlayers[i]],
-          });
-        }
-      }
-      
-      return teams;
+  const saveTournamentProgress = async (
+    tournamentId: string,
+    matchesData: Match[],
+    teamsData: TeamDetail[]
+  ) => {
+    try {
+      const dataToStore: StoredTournamentData = {
+        matches: matchesData,
+        teamDetails: teamsData,
+        lastUpdated: new Date().toISOString(),
+      };
+      await AsyncStorage.setItem(
+        getStorageKey(tournamentId),
+        JSON.stringify(dataToStore)
+      );
+    } catch (error) {
+      console.error('Error saving tournament progress:', error);
     }
+  };
+
+  const loadTournamentProgress = async (
+    tournamentId: string
+  ): Promise<StoredTournamentData | null> => {
+    try {
+      const storedData = await AsyncStorage.getItem(getStorageKey(tournamentId));
+      if (storedData) {
+        return JSON.parse(storedData);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading tournament progress:', error);
+      return null;
+    }
+  };
+
+  const clearTournamentProgress = async (tournamentId: string) => {
+    try {
+      await AsyncStorage.removeItem(getStorageKey(tournamentId));
+    } catch (error) {
+      console.error('Error clearing tournament progress:', error);
+    }
+  };
+
+  // Generate shuffled team details
+  const generateTeamDetails = useMemo(() => {
+    return (): TeamDetail[] => {
+      if (!tournament) return [];
+
+      if (tournament.format === "singles") {
+        const shuffledPlayers = shuffleArray(tournament.players);
+        const availableTeamNames = shuffleArray([...TEAM_NAMES]);
+        
+        return shuffledPlayers.map((player, index) => ({
+          teamName: availableTeamNames[index] || `Team ${index + 1}`,
+          players: [player],
+        }));
+      } else {
+        const shuffledPlayers = shuffleArray(tournament.players);
+        const teams: TeamDetail[] = [];
+        const availableTeamNames = shuffleArray([...TEAM_NAMES]);
+        
+        for (let i = 0; i < shuffledPlayers.length; i += 2) {
+          if (i + 1 < shuffledPlayers.length) {
+            teams.push({
+              teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
+              players: [shuffledPlayers[i], shuffledPlayers[i + 1]],
+            });
+          } else {
+            teams.push({
+              teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
+              players: [shuffledPlayers[i]],
+            });
+          }
+        }
+        
+        return teams;
+      }
+    };
   }, [tournament]);
 
   // Set navigation options
@@ -161,39 +218,77 @@ const TournamentPage: React.FC = () => {
     });
   }, [tournament?.name, navigation]);
 
-  // Generate fixtures with optimization and randomization
+  // Load or generate fixtures
   useEffect(() => {
-    if (!tournament || !teamDetails.length) {
-      setIsLoading(false);
-      setError("No teams available to generate fixtures");
-      return;
-    }
+    const initializeTournament = async () => {
+      if (!tournament) {
+        setIsLoading(false);
+        setError("No tournament data available");
+        return;
+      }
 
-    setIsLoading(true);
-    const fixtures: Match[] = [];
+      setIsLoading(true);
 
-    // Optimized round-robin fixture generation
-    const generateFixtures = () => {
-      for (let i = 0; i < teamDetails.length; i++) {
-        for (let j = i + 1; j < teamDetails.length; j++) {
-          fixtures.push({
-            id: `match-${i}-${j}`,
-            teamA: teamDetails[i].teamName,
-            teamB: teamDetails[j].teamName,
-            scoreA: null,
-            scoreB: null,
-            completed: false,
-          });
+      try {
+        // Try to load existing progress
+        const storedData = await loadTournamentProgress(tournament.id);
+
+        if (storedData && storedData.matches.length > 0) {
+          // Load from storage
+          setMatches(storedData.matches);
+          setStoredTeamDetails(storedData.teamDetails);
+          setIsLoading(false);
+          return;
         }
+
+        // Generate new fixtures if no stored data
+        const teamDetails = generateTeamDetails();
+        
+        if (teamDetails.length === 0) {
+          setIsLoading(false);
+          setError("No teams available to generate fixtures");
+          return;
+        }
+
+        setStoredTeamDetails(teamDetails);
+
+        const fixtures: Match[] = [];
+        for (let i = 0; i < teamDetails.length; i++) {
+          for (let j = i + 1; j < teamDetails.length; j++) {
+            fixtures.push({
+              id: `match-${i}-${j}`,
+              teamA: teamDetails[i].teamName,
+              teamB: teamDetails[j].teamName,
+              scoreA: null,
+              scoreB: null,
+              completed: false,
+            });
+          }
+        }
+
+        const shuffledFixtures = shuffleArray(fixtures);
+        setMatches(shuffledFixtures);
+
+        // Save initial state
+        await saveTournamentProgress(tournament.id, shuffledFixtures, teamDetails);
+        
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error initializing tournament:', err);
+        setError("Failed to initialize tournament");
+        setIsLoading(false);
       }
     };
 
-    generateFixtures();
-    // ⭐️ NEW: Randomize the order of the fixtures
-    const shuffledFixtures = shuffleArray(fixtures); 
-    setMatches(shuffledFixtures);
-    setIsLoading(false);
-  }, [teamDetails, tournament]);
+    initializeTournament();
+  }, [tournament, generateTeamDetails]);
+
+  // Save progress whenever matches change
+  useEffect(() => {
+    if (tournament && matches.length > 0 && storedTeamDetails.length > 0 && !isLoading) {
+      saveTournamentProgress(tournament.id, matches, storedTeamDetails);
+    }
+  }, [matches, tournament, storedTeamDetails, isLoading]);
 
   // Enhanced score update with robust validation
   const updateScore = (id: string, team: "A" | "B", value: string) => {
@@ -244,6 +339,17 @@ const TournamentPage: React.FC = () => {
     );
   };
 
+  // Reset tournament (clear storage and regenerate)
+  const resetTournament = async () => {
+    if (tournament) {
+      await clearTournamentProgress(tournament.id);
+      setMatches([]);
+      setStoredTeamDetails([]);
+      setIsLoading(true);
+      setError(null);
+    }
+  };
+
   // Optimized points table with Net Run Rate
   const pointsTable = useMemo(() => {
     const teamStats: Record<string, { 
@@ -253,7 +359,7 @@ const TournamentPage: React.FC = () => {
       matchesPlayed: number;
     }> = {};
     
-    teamDetails.forEach(team => {
+    storedTeamDetails.forEach(team => {
       teamStats[team.teamName] = {
         points: 0,
         scored: 0,
@@ -264,7 +370,6 @@ const TournamentPage: React.FC = () => {
 
     matches.forEach(match => {
       if (match.completed && match.scoreA !== null && match.scoreB !== null) {
-        // Ensure team exists in stats object
         if (!teamStats[match.teamA]) {
           teamStats[match.teamA] = { points: 0, scored: 0, conceded: 0, matchesPlayed: 0 };
         }
@@ -290,8 +395,7 @@ const TournamentPage: React.FC = () => {
 
     return Object.entries(teamStats)
       .map(([team, stats]) => {
-        // Calculate NRR: (Total runs scored / 21 * matches) - (Total runs conceded / 21 * matches)
-        const matchesPlayed = stats.matchesPlayed || 1; // Avoid division by zero
+        const matchesPlayed = stats.matchesPlayed || 1;
         const nrr = (stats.scored / (21 * matchesPlayed)) - (stats.conceded / (21 * matchesPlayed));
         
         return {
@@ -304,13 +408,12 @@ const TournamentPage: React.FC = () => {
         };
       })
       .sort((a, b) => {
-        // Sort by points first, then by NRR
         if (b.pts !== a.pts) {
           return b.pts - a.pts;
         }
         return b.nrr - a.nrr;
       });
-  }, [matches, teamDetails]);
+  }, [matches, storedTeamDetails]);
 
   // Render match card
   const renderMatchCard = (match: Match, index: number) => {
@@ -337,9 +440,8 @@ const TournamentPage: React.FC = () => {
       return {};
     };
 
-    // Get team members for display
-    const teamAMembers = teamDetails.find(t => t.teamName === match.teamA)?.players || [];
-    const teamBMembers = teamDetails.find(t => t.teamName === match.teamB)?.players || [];
+    const teamAMembers = storedTeamDetails.find(t => t.teamName === match.teamA)?.players || [];
+    const teamBMembers = storedTeamDetails.find(t => t.teamName === match.teamB)?.players || [];
 
     return (
       <View
@@ -362,7 +464,7 @@ const TournamentPage: React.FC = () => {
             <Text 
               style={[styles.teamName, isCompleted && styles.completedTeamName]}
               numberOfLines={1} 
-              ellipsizeMode="tail" // Truncate long names in Fixtures view
+              ellipsizeMode="tail"
             >
               {match.teamA}
             </Text>
@@ -394,7 +496,7 @@ const TournamentPage: React.FC = () => {
             <Text 
               style={[styles.teamName, isCompleted && styles.completedTeamName]}
               numberOfLines={1} 
-              ellipsizeMode="tail" // Truncate long names in Fixtures view
+              ellipsizeMode="tail"
             >
               {match.teamB}
             </Text>
@@ -444,7 +546,7 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  // Render points table (Includes Matches Played and corrected flex)
+  // Render points table
   const renderPointsTable = () => (
     <View style={styles.pointsTableContainer} accessibilityLabel="Points table">
       <View style={[styles.tableRow, styles.tableHeader]}>
@@ -473,30 +575,25 @@ const TournamentPage: React.FC = () => {
               style={[
                 styles.tableRow,
                 index % 2 === 1 && styles.alternateRow,
-                isTopRank && styles.topRankRow, // Highlight top 3
+                isTopRank && styles.topRankRow,
               ]}
             >
-              {/* Rank */}
               <Text
                 style={[styles.tableCellText, styles.rankText, { flex: 0.1, textAlign: "center", color: rankColor }]}
               >
                 {index + 1}
               </Text>
-              {/* Team Name */}
               <View style={{ flex: 0.50, justifyContent: 'center' }}>
                 <Text style={[styles.tableCellText, { textAlign: "left", fontWeight: isTopRank ? '800' : '500' }]}>
                   {item.team}
                 </Text>
               </View>
-              {/* Matches Played (MP) VALUE */}
               <Text style={[styles.tableCellText, { flex: 0.15, textAlign: "center", fontWeight: 'bold' }]}>
                 {item.matchesPlayed}
               </Text>
-              {/* Points (Emphasized) */}
               <Text style={[styles.tableCellText, styles.pointsText, { flex: 0.15, textAlign: "center" }]}>
                 {item.pts}
               </Text>
-              {/* NRR (Color-coded) */}
               <Text style={[styles.tableCellText, styles.nrrText, { flex: 0.25, textAlign: "right", color: nrrColor }]}>
                 {item.nrr > 0 ? `+${item.nrr.toFixed(3)}` : item.nrr.toFixed(3)}
               </Text>
@@ -510,10 +607,10 @@ const TournamentPage: React.FC = () => {
   // Render teams preview
   const renderTeamsPreview = () => (
     <View style={styles.teamsContainer}>
-      {teamDetails.length === 0 ? (
+      {storedTeamDetails.length === 0 ? (
         <Text style={styles.emptyText}>No team details available.</Text>
       ) : (
-        teamDetails.map((team, index) => (
+        storedTeamDetails.map((team, index) => (
           <View key={team.teamName} style={styles.teamCard} accessibilityLabel={`Team ${team.teamName}`}>
             <View style={styles.teamHeader}>
               <Text style={styles.teamIndex}>{index + 1}.</Text>
@@ -541,7 +638,7 @@ const TournamentPage: React.FC = () => {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.ACCENT} />
-          <Text style={styles.loadingText}>Generating fixtures...</Text>
+          <Text style={styles.loadingText}>Loading tournament...</Text>
         </View>
       );
     }
@@ -552,11 +649,7 @@ const TournamentPage: React.FC = () => {
           <Text style={styles.errorText}>{error || "Tournament data not found"}</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => {
-              setError(null);
-              setIsLoading(true);
-              setMatches([]);
-            }}
+            onPress={() => resetTournament()}
             accessibilityLabel="Retry loading tournament data"
           >
             <Text style={styles.retryButtonText}>Retry</Text>
@@ -639,7 +732,7 @@ const TournamentPage: React.FC = () => {
   );
 };
 
-// Updated styles with responsive design
+// Styles remain the same
 const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
@@ -808,12 +901,11 @@ const styles = StyleSheet.create({
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
-  // START OF POINTS TABLE STYLE IMPROVEMENTS
   pointsTableContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Slightly visible background
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)', // Light border for definition
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     overflow: "hidden",
     shadowColor: COLORS.ACCENT,
     shadowOffset: { width: 0, height: 4 },
@@ -823,7 +915,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tableRow: {
-    flexDirection: "row", // 👈 Check this is set correctly to 'row'
+    flexDirection: "row",
     paddingVertical: 12, 
     paddingHorizontal: width * 0.04,
     borderBottomWidth: 0.5,
@@ -831,20 +923,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tableHeader: {
-    backgroundColor: 'rgba(139, 0, 0, 0.6)', // Darker header for contrast
+    backgroundColor: 'rgba(139, 0, 0, 0.6)',
     borderBottomWidth: 2,
-    borderBottomColor: COLORS.ACCENT, // Accent color line
+    borderBottomColor: COLORS.ACCENT,
     paddingVertical: 14,
   },
   headerText: {
-    fontSize: width * 0.038, // Slightly smaller
+    fontSize: width * 0.038,
     fontWeight: "900",
     color: COLORS.TEXT_PRIMARY,
   },
   alternateRow: {
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
-  topRankRow: { // New style for top 3 rows
+  topRankRow: {
     backgroundColor: 'rgba(255, 107, 107, 0.1)',
   },
   tableCellText: {
@@ -857,18 +949,17 @@ const styles = StyleSheet.create({
   },
   pointsText: {
     fontWeight: "900",
-    fontSize: width * 0.048, // Larger and bolder for emphasis
+    fontSize: width * 0.048,
     color: COLORS.ACCENT,
-    backgroundColor: 'rgba(139, 0, 0, 0.3)', // Subtle background on points
+    backgroundColor: 'rgba(139, 0, 0, 0.3)',
     borderRadius: 5,
     paddingVertical: 2,
     overflow: 'hidden',
   },
-  nrrText: { // New style for NRR
+  nrrText: {
     fontWeight: "700",
     fontSize: width * 0.038,
   },
-  // END OF POINTS TABLE STYLE IMPROVEMENTS
   teamsContainer: {
     paddingHorizontal: width * 0.01,
   },
