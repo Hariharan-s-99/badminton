@@ -132,7 +132,7 @@ const TournamentSetupForm: React.FC = () => {
     // Navigate to TournamentPage
     router.push({
       pathname: "/badminton/TournamentFixtures",
-      params: { tournamentData: JSON.stringify(tournament) },
+      params: { tournamentData: JSON.stringify(tournament), id: tournament.id },
     });
   };
 
