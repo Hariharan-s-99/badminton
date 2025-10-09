@@ -4,7 +4,7 @@
     "slug": "badminton",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/winzz_logo.png",
     "scheme": "badminton",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -24,7 +24,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/winzz_logo.svg"
     },
     "plugins": [
       "expo-router",
