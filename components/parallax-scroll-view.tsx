@@ -8,26 +8,6 @@ import Animated, {
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// ✨ BRIGHTER & REDDER Blended gradient
-// Defined as a tuple to satisfy TypeScript
-const BLENDED_WINZZ_GRADIENT = {
-  colors: [
-    "#C83C48",
-    "#AF333D",
-    "#962A33",
-    "#7D212A",
-    "#641720",
-    "#4B0E16",
-    "#32070D",
-    "#190305",
-    "#000000",
-  ] as [string, string, ...string[]], // colors tuple
-  locations: [0, 0.05, 0.1, 0.25, 0.4, 0.6, 0.75, 0.9, 1] as [
-    number,
-    number,
-    ...number[]
-  ], // locations tuple
-};
 
 type Props = PropsWithChildren<{
   backgroundImage?: any;
@@ -38,7 +18,6 @@ type Props = PropsWithChildren<{
 export default function ParallaxScrollView({
   children,
   backgroundImage,
-  overrideGradient = false,
   winzzLogo = true,
 }: Props) {
   const scrollY = useSharedValue(0);
@@ -51,7 +30,6 @@ export default function ParallaxScrollView({
 
   return (
     <View style={styles.container}>
-      {/* Fixed background image */}
       {backgroundImage && (
         <Image
           source={backgroundImage}
@@ -72,7 +50,6 @@ export default function ParallaxScrollView({
         bounces={true}
         alwaysBounceVertical={false}
       >
-        {/* Content Area */}
         <View style={styles.content}>
           {winzzLogo && (
             <Image
@@ -104,19 +81,19 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    zIndex: 2, // Above background image
+    zIndex: 2,
   },
   scrollViewContent: {
-    flexGrow: 1, // Important: allows content to expand and be scrollable
-    minHeight: SCREEN_HEIGHT, // Ensures minimum scrollable area
+    flexGrow: 1,
+    minHeight: SCREEN_HEIGHT,
   },
   content: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 60, // Safe area padding
+    paddingTop: 60,
     paddingBottom: 16,
     gap: 16,
-    zIndex: 5, // Above the image so text is visible
+    zIndex: 5,
     position: "relative",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -128,6 +105,3 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
-
-// Export the blended gradient for reuse
-export { BLENDED_WINZZ_GRADIENT };

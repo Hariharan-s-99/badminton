@@ -20,13 +20,6 @@ interface StyledButtonProps {
   variant?: "large" | "small";
 }
 
-/**
- * StyledButton Component
- * -----------------------
- * Animated, Concert One–styled button.
- * - variant: "large" | "small"
- * - optional textStyle and style overrides
- */
 const StyledButton: React.FC<StyledButtonProps> = ({
   title,
   onPress,

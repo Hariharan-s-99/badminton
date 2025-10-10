@@ -15,7 +15,7 @@ export default function BadmintonScreen() {
   const insets = useSafeAreaInsets();
 
   const handleOrganizeTournament = () => {
-    router.push("/badminton/new");
+    router.push("/badminton/TournamentWrapper");
   };
 
   return (
@@ -77,16 +77,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 25,
     alignItems: "center",
-  },
-  buttonText: {
-    color: "#E8E8E8",
-    fontSize: 52,
-    fontWeight: "900",
-    letterSpacing: 4,
-    textShadowColor: "#1a1a1a",
-    textShadowOffset: { width: -4, height: -4 },
-    textShadowRadius: 0,
-    includeFontPadding: false,
-    textAlignVertical: "center",
   },
 });
