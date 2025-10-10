@@ -1,18 +1,14 @@
 import { router } from 'expo-router';
 import {
-  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
-// NOTE: The component structure has been reverted to use standard React Native 
-// components (View, Text, ScrollView) to resolve the compilation errors related
-// to using HTML tags (h1, div, span) in a React Native environment.
+import { Colors } from "@/constants/theme";
 
-const { width } = Dimensions.get('window');
 
 interface Sport {
   id: string;
@@ -26,7 +22,7 @@ const sports: Sport[] = [
     id: 'badminton',
     name: 'Badminton',
     emoji: '🏸',
-    gradient: ['#4A1419', '#8B0000'],
+    gradient: ['#4A1419', Colors.THEME_CONTRAST],
   },
   {
     id: 'cricket',
@@ -73,6 +69,7 @@ const sports: Sport[] = [
 ];
 
 const SportSelection = () => {
+  
   const handleSportPress = (sport: Sport) => {
     if (sport.id === 'badminton') {
       router.push("./badmintonKickStart");
@@ -89,13 +86,11 @@ const SportSelection = () => {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Pick Your Game</Text>
         <View style={styles.divider} />
       </View>
 
-      {/* Sports List Container */}
       <View style={styles.sportsContainer}>
         {sports.map((sport) => {
           const locked = isLocked(sport.id);
@@ -111,17 +106,14 @@ const SportSelection = () => {
               activeOpacity={locked ? 1 : 0.85}
               disabled={locked}
             >
-              {/* Using View as a background container instead of LinearGradient */}
               <View
                 style={[
                   styles.gradientButton,
-                  { backgroundColor: locked ? sport.gradient[1] : sport.gradient[1] }, // Use darker color as fallback
-                  // Add a subtle color difference for the unlocked item background
+                  { backgroundColor: locked ? sport.gradient[1] : sport.gradient[1] },
                   !locked && { backgroundColor: sport.gradient[1] } 
                 ]}
               >
                 <View style={styles.buttonContent}>
-                  {/* Emoji and Name */}
                   <View style={styles.nameContainer}>
                     <Text
                       style={[
@@ -141,7 +133,6 @@ const SportSelection = () => {
                     </Text>
                   </View>
 
-                  {/* Arrow / Lock Icon */}
                   <View
                     style={[
                       styles.arrow,
@@ -164,7 +155,6 @@ const SportSelection = () => {
         })}
       </View>
 
-      {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>More sports coming soon!</Text>
       </View>
@@ -172,7 +162,6 @@ const SportSelection = () => {
   );
 };
 
-// Re-creating styles using StyleSheet.create for React Native
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
@@ -189,7 +178,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    color: '#E8E8E8',
+    color: Colors.TITLE_COLOR,
     fontSize: 32,
     fontWeight: '900',
     marginBottom: 16,
@@ -198,7 +187,7 @@ const styles = StyleSheet.create({
   divider: {
     width: 80,
     height: 4,
-    backgroundColor: '#8B0000',
+    backgroundColor: Colors.THEME_CONTRAST,
     borderRadius: 2,
   },
   sportsContainer: {
@@ -240,7 +229,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     letterSpacing: 0.3,
-    flexShrink: 1, // Allow text to shrink if necessary
+    flexShrink: 1,
   },
   arrow: {
     width: 44,
@@ -248,7 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 10, // Add spacing before the arrow
+    marginLeft: 10,
   },
   arrowText: {
     fontWeight: 'bold',
@@ -259,21 +248,19 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#E8E8E8',
+    color: Colors.TITLE_COLOR,
     opacity: 0.6,
     fontWeight: '500',
   },
-  // --- ACTIVE (UNLOCKED) STYLES ---
   activeText: {
-    color: '#E8E8E8',
+    color: Colors.TITLE_COLOR,
   },
   activeArrow: {
   },
   activeArrowText: {
-    color: '#E8E8E8',
+    color: Colors.TITLE_COLOR,
     fontSize: 24,
   },
-  // --- LOCKED STYLES ---
   lockedButton: {
     opacity: 0.8,
   },
@@ -281,12 +268,12 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   lockedText: {
-    color: '#AAAAAA',
+    color: Colors.TITLE_COLOR,
   },
   lockedArrow: {
   },
   lockedArrowText: {
-    color: '#6B6B6B',
+    color: Colors.TITLE_COLOR,
     fontSize: 16,
   },
 });

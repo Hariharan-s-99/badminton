@@ -9,6 +9,8 @@ const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
 export const Colors = {
+  TITLE_COLOR: "#E8E8E8",
+  THEME_CONTRAST: "#8B0000",
   button: {
     GO_TEXT: "#E8E8E8",
   },
