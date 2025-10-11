@@ -370,7 +370,6 @@ const TournamentSetupForm: React.FC = () => {
               </View>
             )}
 
-            {/* Create New Button */}
             <TouchableOpacity
               style={styles.createNewButton}
               onPress={() => setStep("setup")}
@@ -394,7 +393,6 @@ const TournamentSetupForm: React.FC = () => {
     );
   }
 
-  /** Player Entry Step */
   if (step === "players") {
     return (
       <ScrollView
@@ -434,7 +432,6 @@ const TournamentSetupForm: React.FC = () => {
     );
   }
 
-  /** Fixture Selection Step */
   if (step === "fixtures") {
     return (
       <ScrollView
@@ -445,7 +442,6 @@ const TournamentSetupForm: React.FC = () => {
         {renderStepIndicator()}
         <Text style={styles.title}>Select Fixture Type</Text>
 
-        {/* WPL Option */}
         <View style={styles.fixtureRow}>
           <TouchableOpacity
             style={[
