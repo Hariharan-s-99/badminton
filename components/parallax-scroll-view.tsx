@@ -1,13 +1,12 @@
 import { Image } from "expo-image";
 import type { PropsWithChildren } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Dimensions, Platform, StatusBar, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = PropsWithChildren<{
   backgroundImage?: any;
@@ -21,6 +20,29 @@ export default function ParallaxScrollView({
   winzzLogo = true,
 }: Props) {
   const scrollY = useSharedValue(0);
+  const insets = useSafeAreaInsets();
+  
+  const [dimensions, setDimensions] = useState({
+    width: Dimensions.get("window").width,
+    height: Platform.select({
+      android: Dimensions.get("screen").height,
+      default: Dimensions.get("window").height,
+    }),
+  });
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ window, screen }) => {
+      setDimensions({
+        width: window.width,
+        height: Platform.select({
+          android: screen.height,
+          default: window.height,
+        }),
+      });
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -28,12 +50,25 @@ export default function ParallaxScrollView({
     },
   });
 
+  // Calculate the actual usable height
+  const contentMinHeight = Platform.select({
+    android: dimensions.height - (StatusBar.currentHeight || 0),
+    default: dimensions.height,
+  });
+
   return (
     <View style={styles.container}>
       {backgroundImage && (
         <Image
           source={backgroundImage}
-          style={styles.backgroundImageFixed}
+          style={[
+            styles.backgroundImageFixed,
+            {
+              width: dimensions.width,
+              height: dimensions.height + insets.top,
+              top: -insets.top,
+            }
+          ]}
           contentFit="cover"
           cachePolicy="memory-disk"
           onLoad={() => console.log("Background image loaded")}
@@ -43,23 +78,37 @@ export default function ParallaxScrollView({
 
       <Animated.ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
+        contentContainerStyle={[
+          styles.scrollViewContent,
+          { 
+            minHeight: contentMinHeight,
+          }
+        ]}
         scrollEventThrottle={16}
         onScroll={scrollHandler}
         showsVerticalScrollIndicator={false}
         bounces={true}
         alwaysBounceVertical={false}
       >
-        <View style={styles.content}>
+        <View style={[
+          styles.content,
+          { 
+            paddingTop: Math.max(insets.top + 20, 60),
+            paddingBottom: Math.max(insets.bottom + 16, 32),
+            minHeight: contentMinHeight - 40,
+          }
+        ]}>
           {winzzLogo && (
             <Image
               source={require("../assets/images/winzz_logo.svg")}
               style={styles.logo}
-              contentFit="cover"
+              contentFit="contain"
               contentPosition="top center"
             />
           )}
-          {children}
+          <View style={styles.childrenContainer}>
+            {children}
+          </View>
         </View>
       </Animated.ScrollView>
     </View>
@@ -69,13 +118,12 @@ export default function ParallaxScrollView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
   backgroundImageFixed: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
     opacity: 1,
     zIndex: 1,
   },
@@ -85,19 +133,20 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexGrow: 1,
-    minHeight: SCREEN_HEIGHT,
   },
   content: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
     gap: 16,
     zIndex: 5,
     position: "relative",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     marginTop: 0,
+  },
+  childrenContainer: {
+    flex: 1,
+    gap: 16,
   },
   logo: {
     width: "100%",
