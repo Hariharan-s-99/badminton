@@ -259,7 +259,7 @@ const TournamentSetupForm: React.FC = () => {
   /** Step navigation */
   const handleGoSetup = () => {
     if (!validateSetup()) return;
-    setPlayers(Array.from({ length: numPlayers }, (_, i) => `Player ${i + 1}`));
+    setPlayers(Array.from({ length: numPlayers }, (_, i) => ``));
     setStep("players");
   };
 
