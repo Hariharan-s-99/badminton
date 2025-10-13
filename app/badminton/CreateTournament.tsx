@@ -15,7 +15,7 @@ import {
 import Toast from "react-native-toast-message";
 import { generateHash } from "../utils";
 
-const COLORS = {
+const Colors = {
   BACKGROUND: "#1A0505",
   TEXT_PRIMARY: "#FFFFFF",
   TEXT_SECONDARY: "#B89090",
@@ -292,7 +292,7 @@ const TournamentSetupForm: React.FC = () => {
         <Text style={styles.subtitle}>Continue or create a new tournament</Text>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.ACCENT} />
+            <ActivityIndicator size="large" color={Colors.ACCENT} />
             <Text style={styles.loadingText}>Loading tournaments...</Text>
           </View>
         ) : (
@@ -334,7 +334,7 @@ const TournamentSetupForm: React.FC = () => {
                       <Ionicons
                         name="trash-outline"
                         size={20}
-                        color={COLORS.ERROR}
+                        color={Colors.ERROR}
                       />
                     </TouchableOpacity>
                   </View>
@@ -349,7 +349,7 @@ const TournamentSetupForm: React.FC = () => {
               <Ionicons
                 name="add-circle-outline"
                 size={32}
-                color={COLORS.ACCENT}
+                color={Colors.ACCENT}
               />
               <Text style={styles.createNewText}>Create New Tournament</Text>
             </TouchableOpacity>
@@ -380,7 +380,7 @@ const TournamentSetupForm: React.FC = () => {
             key={idx}
             style={styles.playerInput}
             placeholder={`Player ${idx + 1}`}
-            placeholderTextColor={COLORS.TEXT_SECONDARY}
+            placeholderTextColor={Colors.TEXT_SECONDARY}
             value={player}
             onChangeText={(text) => {
               const newPlayers = [...players];
@@ -431,7 +431,7 @@ const TournamentSetupForm: React.FC = () => {
             <Ionicons
               name="information-circle-outline"
               size={24}
-              color={COLORS.TEXT_SECONDARY}
+              color={Colors.TEXT_SECONDARY}
             />
           </TouchableOpacity>
         </View>
@@ -459,7 +459,7 @@ const TournamentSetupForm: React.FC = () => {
             <Ionicons
               name="information-circle-outline"
               size={24}
-              color={COLORS.TEXT_SECONDARY}
+              color={Colors.TEXT_SECONDARY}
             />
           </TouchableOpacity>
         </View>
@@ -491,9 +491,9 @@ const TournamentSetupForm: React.FC = () => {
       <Text style={styles.title}>Create Tournament</Text>
 
       <TextInput
-        style={[styles.input, errors.name ? { borderColor: COLORS.ERROR } : {}]}
+        style={[styles.input, errors.name ? { borderColor: Colors.ERROR } : {}]}
         placeholder="Tournament Name"
-        placeholderTextColor={COLORS.TEXT_SECONDARY}
+        placeholderTextColor={Colors.TEXT_SECONDARY}
         value={name}
         onChangeText={(text) => {
           setName(text);
@@ -566,19 +566,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "bold",
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
     fontFamily: "ConcertOne_400Regular",
     marginBottom: 20,
     textAlign: "center",
   },
   input: {
-    backgroundColor: COLORS.INPUT_BG,
+    backgroundColor: Colors.INPUT_BG,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
+    borderColor: Colors.BORDER,
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
     marginBottom: 20,
   },
   formatContainer: {
@@ -591,19 +591,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
+    borderColor: Colors.BORDER,
     borderRadius: 12,
-    backgroundColor: COLORS.LIGHT_BG,
+    backgroundColor: Colors.LIGHT_BG,
     alignItems: "center",
   },
-  activeFormat: { backgroundColor: COLORS.PRIMARY, borderColor: COLORS.ACCENT },
-  formatText: { fontSize: 18, fontWeight: "600", color: COLORS.TEXT_SECONDARY },
-  activeFormatText: { color: COLORS.TEXT_PRIMARY },
+  activeFormat: { backgroundColor: Colors.PRIMARY, borderColor: Colors.ACCENT },
+  formatText: { fontSize: 18, fontWeight: "600", color: Colors.TEXT_SECONDARY },
+  activeFormatText: { color: Colors.TEXT_PRIMARY },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.CARD_BG,
+    backgroundColor: Colors.CARD_BG,
     borderRadius: 20,
     paddingVertical: 18,
     paddingHorizontal: 20,
@@ -618,15 +618,15 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: COLORS.PRIMARY,
+    backgroundColor: Colors.PRIMARY,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: COLORS.ACCENT,
+    borderColor: Colors.ACCENT,
   },
   circleText: {
     fontSize: 32,
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
     fontWeight: "bold",
     lineHeight: 32,
   },
@@ -637,11 +637,11 @@ const styles = StyleSheet.create({
   playerCount: {
     fontSize: 38,
     fontWeight: "bold",
-    color: COLORS.ACCENT,
+    color: Colors.ACCENT,
   },
   playerLabel: {
     fontSize: 14,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     marginTop: 2,
   },
   goButtonContainer: {
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   errorText: {
-    color: COLORS.ERROR,
+    color: Colors.ERROR,
     fontSize: 14,
     textAlign: "center",
     marginVertical: 6,
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     padding: 4,
     fontSize: 30,
     fontFamily: "ConcertOne_400Regular",
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
     marginBottom: 12,
   },
   stepperContainer: {
@@ -672,14 +672,14 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.LIGHT_BG,
+    backgroundColor: Colors.LIGHT_BG,
     alignItems: "center",
     justifyContent: "center",
   },
-  activeStepCircle: { backgroundColor: COLORS.PRIMARY },
-  stepNumber: { color: COLORS.TEXT_PRIMARY, fontWeight: "bold" },
-  stepLine: { width: 40, height: 2, backgroundColor: COLORS.LIGHT_BG },
-  activeStepLine: { backgroundColor: COLORS.ACCENT },
+  activeStepCircle: { backgroundColor: Colors.PRIMARY },
+  stepNumber: { color: Colors.TEXT_PRIMARY, fontWeight: "bold" },
+  stepLine: { width: 40, height: 2, backgroundColor: Colors.LIGHT_BG },
+  activeStepLine: { backgroundColor: Colors.ACCENT },
   fixtureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -691,19 +691,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: COLORS.LIGHT_BG,
+    backgroundColor: Colors.LIGHT_BG,
     alignItems: "center",
     marginRight: 10,
   },
   selectedFixture: {
-    backgroundColor: COLORS.PRIMARY,
+    backgroundColor: Colors.PRIMARY,
     borderWidth: 1,
-    borderColor: COLORS.ACCENT,
+    borderColor: Colors.ACCENT,
   },
   fixtureText: {
     fontSize: 16,
     fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
   },
   infoIcon: {
     padding: 8,
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   fixtureDesc: {
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     fontSize: 14,
     textAlign: "center",
     marginBottom: 12,
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     textAlign: "center",
     marginBottom: 30,
   },
@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   loadingText: {
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     fontSize: 16,
     marginTop: 12,
   },
@@ -745,15 +745,15 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: COLORS.ACCENT,
+    color: Colors.ACCENT,
     marginBottom: 16,
   },
   tournamentCard: {
     flexDirection: "row",
-    backgroundColor: COLORS.CARD_BG,
+    backgroundColor: Colors.CARD_BG,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
+    borderColor: Colors.BORDER,
     marginBottom: 12,
     overflow: "hidden",
   },
@@ -770,12 +770,12 @@ const styles = StyleSheet.create({
   tournamentName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: COLORS.TEXT_PRIMARY,
+    color: Colors.TEXT_PRIMARY,
     flex: 1,
   },
   tournamentDate: {
     fontSize: 12,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     marginLeft: 8,
   },
   tournamentDetails: {
@@ -783,7 +783,7 @@ const styles = StyleSheet.create({
   },
   tournamentMeta: {
     fontSize: 14,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
   },
   deleteButton: {
     justifyContent: "center",
@@ -795,10 +795,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.CARD_BG,
+    backgroundColor: Colors.CARD_BG,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: COLORS.ACCENT,
+    borderColor: Colors.ACCENT,
     borderStyle: "dashed",
     padding: 20,
     gap: 12,
@@ -806,11 +806,11 @@ const styles = StyleSheet.create({
   createNewText: {
     fontSize: 18,
     fontWeight: "600",
-    color: COLORS.ACCENT,
+    color: Colors.ACCENT,
   },
   emptyText: {
     fontSize: 14,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     textAlign: "center",
     marginTop: 12,
     fontStyle: "italic",

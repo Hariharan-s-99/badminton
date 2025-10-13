@@ -1,5 +1,5 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { Colors } from "@/constants/theme";
+import { Colors } from "@/constants";
 import { Stack } from "expo-router";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";

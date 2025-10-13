@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/theme";
+import { Colors } from "@/constants";
 import { ConcertOne_400Regular, useFonts } from "@expo-google-fonts/concert-one";
 import React from "react";
 import {
