@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { generateHash } from "../utils";
 
 const COLORS = {
   BACKGROUND: "#1A0505",
@@ -43,15 +44,6 @@ interface SavedTournament {
 const TOURNAMENT_KEY_PREFIX = 'tournament_';
 const PROGRESS_KEY_PREFIX = 'tournament_progress_';
 
-const generateHash = (length: number = 8): string => {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
 
 const TournamentSetupForm: React.FC = () => {
   const [step, setStep] = useState<Step>("select");
