@@ -1,4 +1,5 @@
 import StyledButton from "@/components/StyledButton";
+import { Colors } from "@/constants";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -15,18 +16,6 @@ import {
 import Toast from "react-native-toast-message";
 import { generateHash } from "../utils";
 
-const Colors = {
-  BACKGROUND: "#1A0505",
-  TEXT_PRIMARY: "#FFFFFF",
-  TEXT_SECONDARY: "#B89090",
-  CARD_BG: "rgba(139, 0, 0, 0.15)",
-  INPUT_BG: "rgba(0, 0, 0, 0.3)",
-  BORDER: "rgba(139, 0, 0, 0.5)",
-  ACCENT: "#FF6B6B",
-  PRIMARY: "#8B0000",
-  ERROR: "#FF4D4D",
-  LIGHT_BG: "rgba(255, 255, 255, 0.08)",
-};
 
 type TournamentFormat = "singles" | "doubles";
 type Step = "select" | "setup" | "players" | "fixtures";
@@ -566,7 +555,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "bold",
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
     fontFamily: "ConcertOne_400Regular",
     marginBottom: 20,
     textAlign: "center",
@@ -578,7 +567,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
     marginBottom: 20,
   },
   formatContainer: {
@@ -598,7 +587,7 @@ const styles = StyleSheet.create({
   },
   activeFormat: { backgroundColor: Colors.PRIMARY, borderColor: Colors.ACCENT },
   formatText: { fontSize: 18, fontWeight: "600", color: Colors.TEXT_SECONDARY },
-  activeFormatText: { color: Colors.TEXT_PRIMARY },
+  activeFormatText: { color: Colors.TITLE_COLOR },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
@@ -626,7 +615,7 @@ const styles = StyleSheet.create({
   },
   circleText: {
     fontSize: 32,
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
     fontWeight: "bold",
     lineHeight: 32,
   },
@@ -658,7 +647,7 @@ const styles = StyleSheet.create({
     padding: 4,
     fontSize: 30,
     fontFamily: "ConcertOne_400Regular",
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
     marginBottom: 12,
   },
   stepperContainer: {
@@ -677,7 +666,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   activeStepCircle: { backgroundColor: Colors.PRIMARY },
-  stepNumber: { color: Colors.TEXT_PRIMARY, fontWeight: "bold" },
+  stepNumber: { color: Colors.TITLE_COLOR, fontWeight: "bold" },
   stepLine: { width: 40, height: 2, backgroundColor: Colors.LIGHT_BG },
   activeStepLine: { backgroundColor: Colors.ACCENT },
   fixtureRow: {
@@ -703,7 +692,7 @@ const styles = StyleSheet.create({
   fixtureText: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
   },
   infoIcon: {
     padding: 8,
@@ -770,7 +759,7 @@ const styles = StyleSheet.create({
   tournamentName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: Colors.TEXT_PRIMARY,
+    color: Colors.TITLE_COLOR,
     flex: 1,
   },
   tournamentDate: {

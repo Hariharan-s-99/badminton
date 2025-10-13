@@ -18,7 +18,7 @@ import {
 // Color constants
 const COLORS = {
   BACKGROUND: "#1A0505",
-  TEXT_PRIMARY: "#FFFFFF",
+  TITLE_COLOR: "#FFFFFF",
   TEXT_SECONDARY: "#B89090",
   CARD_BG: "rgba(139, 0, 0, 0.15)",
   INPUT_BG: "rgba(0, 0, 0, 0.3)",
@@ -538,7 +538,7 @@ const TournamentPage: React.FC = () => {
             onPress={() => editMatch(match.id)}
             accessibilityLabel="Edit match"
           >
-            <Ionicons name="pencil" size={18} color={COLORS.TEXT_PRIMARY} style={{ marginRight: 8 }} />
+            <Ionicons name="pencil" size={18} color={COLORS.TITLE_COLOR} style={{ marginRight: 8 }} />
             <Text style={styles.editButtonText}>Edit Match</Text>
           </TouchableOpacity>
         )}
@@ -565,7 +565,7 @@ const TournamentPage: React.FC = () => {
           const rankColor =
             index === 0 ? COLORS.GOLD :
             index === 1 ? COLORS.SILVER :
-            index === 2 ? COLORS.BRONZE : COLORS.TEXT_PRIMARY;
+            index === 2 ? COLORS.BRONZE : COLORS.TITLE_COLOR;
           const isTopRank = index < 3;
           const nrrColor = item.nrr > 0 ? COLORS.SUCCESS : item.nrr < 0 ? COLORS.ERROR : COLORS.TEXT_SECONDARY;
 
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: width * 0.035,
     fontWeight: "bold",
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
   },
   matchCard: {
     backgroundColor: 'rgba(255, 255, 255, 0)',
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: width * 0.045,
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontWeight: "700",
     marginBottom: 2,
   },
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: width * 0.06,
     fontWeight: "900",
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     borderRadius: 10,
     borderWidth: 1,
@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   completedScoreInput: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     backgroundColor: 'rgba(255, 255, 255, 0)',
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   completeButtonText: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
@@ -897,7 +897,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.ACCENT,
   },
   editButtonText: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: width * 0.038,
     fontWeight: "900",
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
   },
   alternateRow: {
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
   },
   tableCellText: {
     fontSize: width * 0.038,
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
   },
   rankText: {
     fontWeight: "bold",
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
   teamFullName: {
     fontSize: width * 0.05,
     fontWeight: 'bold',
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
   },
   playersTitle: {
     fontSize: width * 0.035,
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
   },
   playerItem: {
     fontSize: width * 0.04,
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     paddingVertical: 2,
   },
   detailSeparator: {
@@ -1055,7 +1055,7 @@ const styles = StyleSheet.create({
     marginHorizontal: width * 0.2,
   },
   retryButtonText: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },

@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const COLORS = {
-  TEXT_PRIMARY: "#E8E8E8",
+  TITLE_COLOR: "#E8E8E8",
   BUTTON_PRIMARY: "rgba(180, 131, 131, 0.26)",
   BUTTON_SECONDARY: "rgba(99, 7, 7, 0.26)",
   BACK_ICON_BACKGROUND: "rgba(122, 8, 8, 0.4)",
@@ -49,14 +49,14 @@ const styles = StyleSheet.create({
     minHeight: 600,
   },
   welcomeText: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 12,
   },
   description: {
-    color: COLORS.TEXT_PRIMARY,
+    color: COLORS.TITLE_COLOR,
     fontSize: 16,
     textAlign: "center",
     opacity: 0.9,

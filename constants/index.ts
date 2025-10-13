@@ -11,6 +11,15 @@ const tintColorDark = "#fff";
 export const Colors = {
   TITLE_COLOR: "#E8E8E8",
   THEME_CONTRAST: "#8B0000",
+  BACKGROUND: "#1A0505",
+  TEXT_SECONDARY: "#B89090",
+  CARD_BG: "rgba(139, 0, 0, 0.15)",
+  INPUT_BG: "rgba(0, 0, 0, 0.3)",
+  BORDER: "rgba(139, 0, 0, 0.5)",
+  ACCENT: "#FF6B6B",
+  PRIMARY: "#8B0000",
+  ERROR: "#FF4D4D",
+  LIGHT_BG: "rgba(255, 255, 255, 0.08)",
   button: {
     GO_TEXT: "#E8E8E8",
   },
