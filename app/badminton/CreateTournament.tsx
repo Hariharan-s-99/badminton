@@ -1,4 +1,3 @@
-// SYNCHRONIZED CreateTournament.tsx
 import StyledButton from "@/components/StyledButton";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,11 +40,9 @@ interface SavedTournament {
   isComplete?: boolean;
 }
 
-// STORAGE KEYS - must match TournamentPage
 const TOURNAMENT_KEY_PREFIX = 'tournament_';
 const PROGRESS_KEY_PREFIX = 'tournament_progress_';
 
-// Utility to generate a simple unique hash
 const generateHash = (length: number = 8): string => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -76,7 +73,6 @@ const TournamentSetupForm: React.FC = () => {
   const minPlayers = format === "doubles" ? 4 : 2;
   const playerStep = format === "doubles" ? 2 : 1;
 
-  // Load saved tournaments on mount
   useEffect(() => {
     loadSavedTournaments();
   }, []);
@@ -85,7 +81,6 @@ const TournamentSetupForm: React.FC = () => {
     try {
       setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
-      // Look for keys that start with 'tournament_' prefix
       const tournamentKeys = keys.filter(
         (key) => key.startsWith(TOURNAMENT_KEY_PREFIX) && !key.includes('_progress_')
       );
@@ -96,7 +91,6 @@ const TournamentSetupForm: React.FC = () => {
         if (data) {
           try {
             const tournament = JSON.parse(data);
-            // Validate tournament structure
             if (tournament.id && tournament.name && tournament.format && tournament.players) {
               tournaments.push(tournament);
             }
@@ -106,7 +100,6 @@ const TournamentSetupForm: React.FC = () => {
         }
       }
 
-      // Sort by most recent
       tournaments.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -129,7 +122,6 @@ const TournamentSetupForm: React.FC = () => {
       visibilityTime: 2000,
     });
 
-    // Navigate to TournamentPage with tournament data
     router.push({
       pathname: "/badminton/TournamentFixtures",
       params: { 
@@ -141,7 +133,6 @@ const TournamentSetupForm: React.FC = () => {
 
   const deleteTournament = async (tournamentId: string) => {
     try {
-      // Delete both tournament data and progress data
       await AsyncStorage.removeItem(tournamentId);
       await AsyncStorage.removeItem(`${PROGRESS_KEY_PREFIX}${tournamentId}`);
       
@@ -166,7 +157,6 @@ const TournamentSetupForm: React.FC = () => {
     }
   };
 
-  /** Validation for tournament name and number of players */
   const validateSetup = () => {
     const newErrors: { name?: string; players?: string } = {};
 
@@ -186,7 +176,6 @@ const TournamentSetupForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  /** Validation for players (unique & filled) */
   const validatePlayers = () => {
     const trimmed = players.map((p) => p.trim());
     const hasEmpty = trimmed.some((p) => !p);
@@ -205,10 +194,8 @@ const TournamentSetupForm: React.FC = () => {
     return true;
   };
 
-  /** Save tournament and navigate */
   const saveTournament = async () => {
     try {
-      // Generate tournament ID with consistent format
       const tournamentId = `${TOURNAMENT_KEY_PREFIX}${name
         .trim()
         .replace(/\s+/g, "_")}_${Date.now()}_${generateHash(6)}`;
@@ -222,10 +209,8 @@ const TournamentSetupForm: React.FC = () => {
         createdAt: new Date().toISOString(),
       };
       
-      // Save tournament metadata
       await AsyncStorage.setItem(tournamentId, JSON.stringify(tournamentData));
 
-      // Show success toast
       Toast.show({
         type: "success",
         text1: "Tournament Created!",
@@ -234,7 +219,6 @@ const TournamentSetupForm: React.FC = () => {
         visibilityTime: 3000,
       });
 
-      // Navigate with both tournamentData and id
       router.push({
         pathname: "/badminton/TournamentFixtures",
         params: { 
@@ -256,7 +240,6 @@ const TournamentSetupForm: React.FC = () => {
     }
   };
 
-  /** Step navigation */
   const handleGoSetup = () => {
     if (!validateSetup()) return;
     setPlayers(Array.from({ length: numPlayers }, (_, i) => ``));
@@ -276,7 +259,6 @@ const TournamentSetupForm: React.FC = () => {
   const handleDecrement = () =>
     setNumPlayers((prev) => Math.max(minPlayers, prev - playerStep));
 
-  /** Step Indicator */
   const renderStepIndicator = () => {
     const steps: Step[] = ["select", "setup", "players", "fixtures"];
     const currentIndex = steps.indexOf(step);
@@ -307,7 +289,6 @@ const TournamentSetupForm: React.FC = () => {
     );
   };
 
-  /** Select Tournament Step */
   if (step === "select") {
     return (
       <ScrollView
@@ -324,7 +305,6 @@ const TournamentSetupForm: React.FC = () => {
           </View>
         ) : (
           <>
-            {/* Saved Tournaments */}
             {savedTournaments.length > 0 && (
               <View style={styles.savedSection}>
                 <Text style={styles.sectionTitle}>Saved Tournaments</Text>
@@ -470,7 +450,6 @@ const TournamentSetupForm: React.FC = () => {
           </Text>
         )}
 
-        {/* Round-robin Option */}
         <View style={styles.fixtureRow}>
           <TouchableOpacity
             style={[
@@ -510,7 +489,6 @@ const TournamentSetupForm: React.FC = () => {
     );
   }
 
-  /** Setup Step */
   return (
     <ScrollView
       style={styles.scrollView}
@@ -520,7 +498,6 @@ const TournamentSetupForm: React.FC = () => {
       {renderStepIndicator()}
       <Text style={styles.title}>Create Tournament</Text>
 
-      {/* Tournament Name */}
       <TextInput
         style={[styles.input, errors.name ? { borderColor: COLORS.ERROR } : {}]}
         placeholder="Tournament Name"
@@ -533,7 +510,6 @@ const TournamentSetupForm: React.FC = () => {
       />
       {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-      {/* Format Selector */}
       <View style={styles.formatContainer}>
         {(["singles", "doubles"] as const).map((type) => (
           <TouchableOpacity
@@ -564,7 +540,6 @@ const TournamentSetupForm: React.FC = () => {
         ))}
       </View>
 
-      {/* Player Stepper */}
       <View style={styles.stepper}>
         <TouchableOpacity onPress={handleDecrement} style={styles.circleButton}>
           <Text style={styles.circleText}>−</Text>
@@ -588,7 +563,6 @@ const TournamentSetupForm: React.FC = () => {
   );
 };
 
-/** Styles */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: {
