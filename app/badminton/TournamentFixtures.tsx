@@ -1,6 +1,6 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationProp } from "@react-navigation/native";
 import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -15,26 +15,8 @@ import {
   View,
 } from "react-native";
 
-const COLORS = {
-  BACKGROUND: "#1A0505",
-  TITLE_COLOR: "#FFFFFF",
-  TEXT_SECONDARY: "#B89090",
-  CARD_BG: "rgba(139, 0, 0, 0.15)",
-  INPUT_BG: "rgba(0, 0, 0, 0.3)",
-  BORDER: "rgba(139, 0, 0, 0.5)",
-  ACCENT: "#FF6B6B",
-  PRIMARY: "#8B0000",
-  ERROR: "#FF4D4D",
-  LIGHT_BG: "rgba(255, 255, 255, 0.08)",
-  ACTIVE_TAB: "#FF9E9E",
-  COMPLETED_CARD: "rgba(139, 0, 0, 0.3)",
-  SUCCESS: "#4CAF50",
-  GOLD: '#FFD700',
-  SILVER: '#C0C0C0',
-  BRONZE: '#CD7F32',
-};
+import { Colors } from "@/constants";
 
-// Interfaces
 interface TournamentData {
   id: string;
   name: string;
@@ -84,7 +66,7 @@ const TEAM_NAMES = [
   "Hot Shots",
 ];
 
-const STORAGE_KEY_PREFIX = 'tournament_progress_';
+const STORAGE_KEY_PREFIX = "tournament_progress_";
 
 // Fisher-Yates shuffle algorithm for better randomization
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -97,7 +79,10 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 const TournamentPage: React.FC = () => {
-  const params = useLocalSearchParams<{ tournamentData?: string, id: string }>();
+  const params = useLocalSearchParams<{
+    tournamentData?: string;
+    id: string;
+  }>();
   const navigation = useNavigation<NavigationProp<any>>();
   const [matches, setMatches] = useState<Match[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("fixtures");
@@ -142,7 +127,7 @@ const TournamentPage: React.FC = () => {
         JSON.stringify(dataToStore)
       );
     } catch (error) {
-      console.error('Error saving tournament progress:', error);
+      console.error("Error saving tournament progress:", error);
     }
   };
 
@@ -150,13 +135,15 @@ const TournamentPage: React.FC = () => {
     tournamentId: string
   ): Promise<StoredTournamentData | null> => {
     try {
-      const storedData = await AsyncStorage.getItem(getStorageKey(tournamentId));
+      const storedData = await AsyncStorage.getItem(
+        getStorageKey(tournamentId)
+      );
       if (storedData) {
         return JSON.parse(storedData);
       }
       return null;
     } catch (error) {
-      console.error('Error loading tournament progress:', error);
+      console.error("Error loading tournament progress:", error);
       return null;
     }
   };
@@ -165,7 +152,7 @@ const TournamentPage: React.FC = () => {
     try {
       await AsyncStorage.removeItem(getStorageKey(tournamentId));
     } catch (error) {
-      console.error('Error clearing tournament progress:', error);
+      console.error("Error clearing tournament progress:", error);
     }
   };
 
@@ -176,7 +163,7 @@ const TournamentPage: React.FC = () => {
       if (tournament.format === "singles") {
         const shuffledPlayers = shuffleArray(tournament.players);
         const availableTeamNames = shuffleArray([...TEAM_NAMES]);
-        
+
         return shuffledPlayers.map((player, index) => ({
           teamName: availableTeamNames[index] || `Team ${index + 1}`,
           players: [player],
@@ -185,21 +172,23 @@ const TournamentPage: React.FC = () => {
         const shuffledPlayers = shuffleArray(tournament.players);
         const teams: TeamDetail[] = [];
         const availableTeamNames = shuffleArray([...TEAM_NAMES]);
-        
+
         for (let i = 0; i < shuffledPlayers.length; i += 2) {
           if (i + 1 < shuffledPlayers.length) {
             teams.push({
-              teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
+              teamName:
+                availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
               players: [shuffledPlayers[i], shuffledPlayers[i + 1]],
             });
           } else {
             teams.push({
-              teamName: availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
+              teamName:
+                availableTeamNames[teams.length] || `Team ${teams.length + 1}`,
               players: [shuffledPlayers[i]],
             });
           }
         }
-        
+
         return teams;
       }
     };
@@ -209,7 +198,7 @@ const TournamentPage: React.FC = () => {
     navigation.setOptions({
       headerShown: false,
       title: tournament?.name || "Tournament",
-      contentStyle: { backgroundColor: COLORS.BACKGROUND },
+      contentStyle: { backgroundColor: Colors.BACKGROUND },
     });
   }, [tournament?.name, navigation]);
 
@@ -235,7 +224,7 @@ const TournamentPage: React.FC = () => {
         }
 
         const teamDetails = generateTeamDetails();
-        
+
         if (teamDetails.length === 0) {
           setIsLoading(false);
           setError("No teams available to generate fixtures");
@@ -261,11 +250,15 @@ const TournamentPage: React.FC = () => {
         const shuffledFixtures = shuffleArray(fixtures);
         setMatches(shuffledFixtures);
 
-        await saveTournamentProgress(tournament.id, shuffledFixtures, teamDetails);
-        
+        await saveTournamentProgress(
+          tournament.id,
+          shuffledFixtures,
+          teamDetails
+        );
+
         setIsLoading(false);
       } catch (err) {
-        console.error('Error initializing tournament:', err);
+        console.error("Error initializing tournament:", err);
         setError("Failed to initialize tournament");
         setIsLoading(false);
       }
@@ -275,7 +268,12 @@ const TournamentPage: React.FC = () => {
   }, [tournament, generateTeamDetails]);
 
   useEffect(() => {
-    if (tournament && matches.length > 0 && storedTeamDetails.length > 0 && !isLoading) {
+    if (
+      tournament &&
+      matches.length > 0 &&
+      storedTeamDetails.length > 0 &&
+      !isLoading
+    ) {
       saveTournamentProgress(tournament.id, matches, storedTeamDetails);
     }
   }, [matches, tournament, storedTeamDetails, isLoading]);
@@ -283,8 +281,8 @@ const TournamentPage: React.FC = () => {
   const updateScore = (id: string, team: "A" | "B", value: string) => {
     const cleanedValue = value.trim();
     if (cleanedValue === "") {
-      setMatches(prev =>
-        prev.map(m =>
+      setMatches((prev) =>
+        prev.map((m) =>
           m.id === id && !m.completed ? { ...m, [`score${team}`]: null } : m
         )
       );
@@ -301,16 +299,18 @@ const TournamentPage: React.FC = () => {
       return;
     }
 
-    setMatches(prev =>
-      prev.map(m =>
-        m.id === id && !m.completed ? { ...m, [`score${team}`]: parsedValue } : m
+    setMatches((prev) =>
+      prev.map((m) =>
+        m.id === id && !m.completed
+          ? { ...m, [`score${team}`]: parsedValue }
+          : m
       )
     );
   };
 
   const completeMatch = (id: string) => {
-    setMatches(prev =>
-      prev.map(m =>
+    setMatches((prev) =>
+      prev.map((m) =>
         m.id === id && m.scoreA !== null && m.scoreB !== null
           ? { ...m, completed: true }
           : m
@@ -319,10 +319,8 @@ const TournamentPage: React.FC = () => {
   };
 
   const editMatch = (id: string) => {
-    setMatches(prev =>
-      prev.map(m =>
-        m.id === id ? { ...m, completed: false } : m
-      )
+    setMatches((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, completed: false } : m))
     );
   };
 
@@ -337,14 +335,17 @@ const TournamentPage: React.FC = () => {
   };
 
   const pointsTable = useMemo(() => {
-    const teamStats: Record<string, { 
-      points: number;
-      scored: number;
-      conceded: number;
-      matchesPlayed: number;
-    }> = {};
-    
-    storedTeamDetails.forEach(team => {
+    const teamStats: Record<
+      string,
+      {
+        points: number;
+        scored: number;
+        conceded: number;
+        matchesPlayed: number;
+      }
+    > = {};
+
+    storedTeamDetails.forEach((team) => {
       teamStats[team.teamName] = {
         points: 0,
         scored: 0,
@@ -353,23 +354,33 @@ const TournamentPage: React.FC = () => {
       };
     });
 
-    matches.forEach(match => {
+    matches.forEach((match) => {
       if (match.completed && match.scoreA !== null && match.scoreB !== null) {
         if (!teamStats[match.teamA]) {
-          teamStats[match.teamA] = { points: 0, scored: 0, conceded: 0, matchesPlayed: 0 };
+          teamStats[match.teamA] = {
+            points: 0,
+            scored: 0,
+            conceded: 0,
+            matchesPlayed: 0,
+          };
         }
         if (!teamStats[match.teamB]) {
-          teamStats[match.teamB] = { points: 0, scored: 0, conceded: 0, matchesPlayed: 0 };
+          teamStats[match.teamB] = {
+            points: 0,
+            scored: 0,
+            conceded: 0,
+            matchesPlayed: 0,
+          };
         }
-        
+
         teamStats[match.teamA].scored += match.scoreA;
         teamStats[match.teamA].conceded += match.scoreB;
         teamStats[match.teamA].matchesPlayed += 1;
-        
+
         teamStats[match.teamB].scored += match.scoreB;
         teamStats[match.teamB].conceded += match.scoreA;
         teamStats[match.teamB].matchesPlayed += 1;
-        
+
         if (match.scoreA > match.scoreB) {
           teamStats[match.teamA].points += 2;
         } else if (match.scoreB > match.scoreA) {
@@ -381,8 +392,10 @@ const TournamentPage: React.FC = () => {
     return Object.entries(teamStats)
       .map(([team, stats]) => {
         const matchesPlayed = stats.matchesPlayed || 1;
-        const nrr = (stats.scored / (21 * matchesPlayed)) - (stats.conceded / (21 * matchesPlayed));
-        
+        const nrr =
+          stats.scored / (21 * matchesPlayed) -
+          stats.conceded / (21 * matchesPlayed);
+
         return {
           team,
           pts: stats.points,
@@ -417,16 +430,18 @@ const TournamentPage: React.FC = () => {
       if (!isCompleted || score === null) return {};
       if (winner === teamName) {
         return {
-          borderColor: COLORS.ACCENT,
-          backgroundColor: 'rgba(255, 107, 107, 0.1)',
+          borderColor: Colors.ACCENT,
+          backgroundColor: "rgba(255, 107, 107, 0.1)",
           borderWidth: 2,
         };
       }
       return {};
     };
 
-    const teamAMembers = storedTeamDetails.find(t => t.teamName === match.teamA)?.players || [];
-    const teamBMembers = storedTeamDetails.find(t => t.teamName === match.teamB)?.players || [];
+    const teamAMembers =
+      storedTeamDetails.find((t) => t.teamName === match.teamA)?.players || [];
+    const teamBMembers =
+      storedTeamDetails.find((t) => t.teamName === match.teamB)?.players || [];
 
     return (
       <View
@@ -438,32 +453,30 @@ const TournamentPage: React.FC = () => {
           <Ionicons
             name="checkmark-circle"
             size={24}
-            color={COLORS.SUCCESS}
+            color={Colors.SUCCESS}
             style={styles.completedIcon}
           />
         )}
         <Text style={styles.matchTitle}>Match {index + 1}</Text>
-        
+
         <View style={styles.teamRow}>
           <View style={styles.teamInfoContainer}>
-            <Text 
+            <Text
               style={[styles.teamName, isCompleted && styles.completedTeamName]}
-              numberOfLines={1} 
+              numberOfLines={1}
               ellipsizeMode="tail"
             >
               {match.teamA}
             </Text>
-            <Text style={styles.teamMembers}>
-              {teamAMembers.join(', ')}
-            </Text>
+            <Text style={styles.teamMembers}>{teamAMembers.join(", ")}</Text>
           </View>
           <TextInput
             keyboardType="numeric"
             maxLength={2}
             placeholder="0"
-            placeholderTextColor={COLORS.TEXT_SECONDARY}
+            placeholderTextColor={Colors.TEXT_SECONDARY}
             value={match.scoreA?.toString() || ""}
-            onChangeText={val => updateScore(match.id, "A", val)}
+            onChangeText={(val) => updateScore(match.id, "A", val)}
             style={[
               styles.scoreInput,
               isCompleted && styles.completedScoreInput,
@@ -478,24 +491,22 @@ const TournamentPage: React.FC = () => {
 
         <View style={styles.teamRow}>
           <View style={styles.teamInfoContainer}>
-            <Text 
+            <Text
               style={[styles.teamName, isCompleted && styles.completedTeamName]}
-              numberOfLines={1} 
+              numberOfLines={1}
               ellipsizeMode="tail"
             >
               {match.teamB}
             </Text>
-            <Text style={styles.teamMembers}>
-              {teamBMembers.join(', ')}
-            </Text>
+            <Text style={styles.teamMembers}>{teamBMembers.join(", ")}</Text>
           </View>
           <TextInput
             keyboardType="numeric"
             maxLength={2}
             placeholder="0"
-            placeholderTextColor={COLORS.TEXT_SECONDARY}
+            placeholderTextColor={Colors.TEXT_SECONDARY}
             value={match.scoreB?.toString() || ""}
-            onChangeText={val => updateScore(match.id, "B", val)}
+            onChangeText={(val) => updateScore(match.id, "B", val)}
             style={[
               styles.scoreInput,
               isCompleted && styles.completedScoreInput,
@@ -508,7 +519,10 @@ const TournamentPage: React.FC = () => {
 
         {!isCompleted && (
           <TouchableOpacity
-            style={[styles.completeButton, !canComplete && styles.buttonDisabled]}
+            style={[
+              styles.completeButton,
+              !canComplete && styles.buttonDisabled,
+            ]}
             onPress={() => completeMatch(match.id)}
             disabled={!canComplete}
             accessibilityLabel="Mark match as completed"
@@ -516,14 +530,19 @@ const TournamentPage: React.FC = () => {
             <Text style={styles.completeButtonText}>Complete</Text>
           </TouchableOpacity>
         )}
-        
+
         {isCompleted && (
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => editMatch(match.id)}
             accessibilityLabel="Edit match"
           >
-            <Ionicons name="pencil" size={18} color={COLORS.TITLE_COLOR} style={{ marginRight: 8 }} />
+            <Ionicons
+              name="pencil"
+              size={18}
+              color={Colors.TITLE_COLOR}
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.editButtonText}>Edit Match</Text>
           </TouchableOpacity>
         )}
@@ -535,11 +554,21 @@ const TournamentPage: React.FC = () => {
   const renderPointsTable = () => (
     <View style={styles.pointsTableContainer} accessibilityLabel="Points table">
       <View style={[styles.tableRow, styles.tableHeader]}>
-        <Text style={[styles.headerText, { flex: 0.1, textAlign: "center" }]}>#</Text>
-        <Text style={[styles.headerText, { flex: 0.50, textAlign: "left" }]}>Team</Text> 
-        <Text style={[styles.headerText, { flex: 0.15, textAlign: "center" }]}>MP</Text> 
-        <Text style={[styles.headerText, { flex: 0.15, textAlign: "center" }]}>Pts</Text>
-        <Text style={[styles.headerText, { flex: 0.25, textAlign: "right" }]}>NRR</Text> 
+        <Text style={[styles.headerText, { flex: 0.1, textAlign: "center" }]}>
+          #
+        </Text>
+        <Text style={[styles.headerText, { flex: 0.5, textAlign: "left" }]}>
+          Team
+        </Text>
+        <Text style={[styles.headerText, { flex: 0.15, textAlign: "center" }]}>
+          MP
+        </Text>
+        <Text style={[styles.headerText, { flex: 0.15, textAlign: "center" }]}>
+          Pts
+        </Text>
+        <Text style={[styles.headerText, { flex: 0.25, textAlign: "right" }]}>
+          NRR
+        </Text>
       </View>
       {pointsTable.length === 0 ? (
         <Text style={styles.emptyText}>
@@ -548,11 +577,20 @@ const TournamentPage: React.FC = () => {
       ) : (
         pointsTable.map((item, index) => {
           const rankColor =
-            index === 0 ? COLORS.GOLD :
-            index === 1 ? COLORS.SILVER :
-            index === 2 ? COLORS.BRONZE : COLORS.TITLE_COLOR;
+            index === 0
+              ? Colors.GOLD
+              : index === 1
+              ? Colors.SILVER
+              : index === 2
+              ? Colors.BRONZE
+              : Colors.TITLE_COLOR;
           const isTopRank = index < 3;
-          const nrrColor = item.nrr > 0 ? COLORS.SUCCESS : item.nrr < 0 ? COLORS.ERROR : COLORS.TEXT_SECONDARY;
+          const nrrColor =
+            item.nrr > 0
+              ? Colors.SUCCESS
+              : item.nrr < 0
+              ? Colors.ERROR
+              : Colors.TEXT_SECONDARY;
 
           return (
             <View
@@ -564,22 +602,51 @@ const TournamentPage: React.FC = () => {
               ]}
             >
               <Text
-                style={[styles.tableCellText, styles.rankText, { flex: 0.1, textAlign: "center", color: rankColor }]}
+                style={[
+                  styles.tableCellText,
+                  styles.rankText,
+                  { flex: 0.1, textAlign: "center", color: rankColor },
+                ]}
               >
                 {index + 1}
               </Text>
-              <View style={{ flex: 0.50, justifyContent: 'center' }}>
-                <Text style={[styles.tableCellText, { textAlign: "left", fontWeight: isTopRank ? '800' : '500' }]}>
+              <View style={{ flex: 0.5, justifyContent: "center" }}>
+                <Text
+                  style={[
+                    styles.tableCellText,
+                    {
+                      textAlign: "left",
+                      fontWeight: isTopRank ? "800" : "500",
+                    },
+                  ]}
+                >
                   {item.team}
                 </Text>
               </View>
-              <Text style={[styles.tableCellText, { flex: 0.15, textAlign: "center", fontWeight: 'bold' }]}>
+              <Text
+                style={[
+                  styles.tableCellText,
+                  { flex: 0.15, textAlign: "center", fontWeight: "bold" },
+                ]}
+              >
                 {item.matchesPlayed}
               </Text>
-              <Text style={[styles.tableCellText, styles.pointsText, { flex: 0.15, textAlign: "center" }]}>
+              <Text
+                style={[
+                  styles.tableCellText,
+                  styles.pointsText,
+                  { flex: 0.15, textAlign: "center" },
+                ]}
+              >
                 {item.pts}
               </Text>
-              <Text style={[styles.tableCellText, styles.nrrText, { flex: 0.25, textAlign: "right", color: nrrColor }]}>
+              <Text
+                style={[
+                  styles.tableCellText,
+                  styles.nrrText,
+                  { flex: 0.25, textAlign: "right", color: nrrColor },
+                ]}
+              >
                 {item.nrr > 0 ? `+${item.nrr.toFixed(3)}` : item.nrr.toFixed(3)}
               </Text>
             </View>
@@ -596,13 +663,17 @@ const TournamentPage: React.FC = () => {
         <Text style={styles.emptyText}>No team details available.</Text>
       ) : (
         storedTeamDetails.map((team, index) => (
-          <View key={team.teamName} style={styles.teamCard} accessibilityLabel={`Team ${team.teamName}`}>
+          <View
+            key={team.teamName}
+            style={styles.teamCard}
+            accessibilityLabel={`Team ${team.teamName}`}
+          >
             <View style={styles.teamHeader}>
               <Text style={styles.teamIndex}>{index + 1}.</Text>
               <Text style={styles.teamFullName}>{team.teamName}</Text>
             </View>
             <Text style={styles.playersTitle}>
-              {tournament?.format === 'singles' ? 'Player:' : 'Team Members:'}
+              {tournament?.format === "singles" ? "Player:" : "Team Members:"}
             </Text>
             <View style={styles.playersList}>
               {team.players.map((player, pIndex) => (
@@ -622,7 +693,7 @@ const TournamentPage: React.FC = () => {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.ACCENT} />
+          <ActivityIndicator size="large" color={Colors.ACCENT} />
           <Text style={styles.loadingText}>Loading tournament...</Text>
         </View>
       );
@@ -631,7 +702,9 @@ const TournamentPage: React.FC = () => {
     if (error || !tournament) {
       return (
         <View style={styles.content}>
-          <Text style={styles.errorText}>{error || "Tournament data not found"}</Text>
+          <Text style={styles.errorText}>
+            {error || "Tournament data not found"}
+          </Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => resetTournament()}
@@ -647,21 +720,30 @@ const TournamentPage: React.FC = () => {
       <View style={styles.mainContent}>
         <View style={styles.tabContainer}>
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === "fixtures" && styles.activeTabStyle]}
+            style={[
+              styles.tabButton,
+              activeTab === "fixtures" && styles.activeTabStyle,
+            ]}
             onPress={() => setActiveTab("fixtures")}
             accessibilityLabel="View fixtures"
           >
             <Text style={styles.tabText}>Fixtures</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === "points" && styles.activeTabStyle]}
+            style={[
+              styles.tabButton,
+              activeTab === "points" && styles.activeTabStyle,
+            ]}
             onPress={() => setActiveTab("points")}
             accessibilityLabel="View points table"
           >
             <Text style={styles.tabText}>Points Table</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === "teams" && styles.activeTabStyle]}
+            style={[
+              styles.tabButton,
+              activeTab === "teams" && styles.activeTabStyle,
+            ]}
             onPress={() => setActiveTab("teams")}
             accessibilityLabel="View team details"
           >
@@ -709,7 +791,7 @@ const TournamentPage: React.FC = () => {
       <Stack.Screen
         options={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.BACKGROUND },
+          contentStyle: { backgroundColor: Colors.BACKGROUND },
         }}
       />
       {renderContent()}
@@ -718,11 +800,11 @@ const TournamentPage: React.FC = () => {
 };
 
 // Styles remain the same
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: Colors.BACKGROUND,
   },
   mainContent: {
     flex: 1,
@@ -738,23 +820,23 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: width * 0.06,
     fontWeight: "900",
-    color: COLORS.ACCENT,
+    color: Colors.ACCENT,
     marginBottom: 20,
     textAlign: "left",
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: 'rgba(255, 255, 255, 0)',
+    backgroundColor: "rgba(255, 255, 255, 0)",
     marginHorizontal: width * 0.04,
     marginTop: 15,
     borderRadius: 15,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(10px)",
   },
   tabButton: {
     flex: 1,
@@ -762,35 +844,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activeTabStyle: {
-    backgroundColor: 'rgba(139, 0, 0, 0.5)',
-    borderBottomColor: COLORS.ACCENT,
+    backgroundColor: "rgba(139, 0, 0, 0.5)",
+    borderBottomColor: Colors.ACCENT,
     borderBottomWidth: 3,
   },
   tabText: {
     fontSize: width * 0.035,
     fontWeight: "bold",
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
   },
   matchCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0)',
+    backgroundColor: "rgba(255, 255, 255, 0)",
     borderRadius: 15,
     padding: width * 0.05,
     borderLeftWidth: 5,
-    borderLeftColor: COLORS.PRIMARY,
+    borderLeftColor: Colors.PRIMARY,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: "rgba(255, 255, 255, 0.1)",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
     marginBottom: 15,
-    backdropFilter: 'blur(10px)',
+    backdropFilter: "blur(10px)",
   },
   completedCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0)',
-    borderLeftColor: COLORS.SUCCESS,
-    borderColor: 'rgba(255, 255, 255, 0)',
-    shadowColor: COLORS.SUCCESS,
+    backgroundColor: "rgba(255, 255, 255, 0)",
+    borderLeftColor: Colors.SUCCESS,
+    borderColor: "rgba(255, 255, 255, 0)",
+    shadowColor: Colors.SUCCESS,
   },
   completedIcon: {
     position: "absolute",
@@ -801,7 +883,7 @@ const styles = StyleSheet.create({
   matchTitle: {
     fontSize: width * 0.055,
     fontWeight: "bold",
-    color: COLORS.ACCENT,
+    color: Colors.ACCENT,
     marginBottom: 10,
   },
   teamRow: {
@@ -816,17 +898,17 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: width * 0.045,
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
     fontWeight: "700",
     marginBottom: 2,
   },
   teamMembers: {
     fontSize: width * 0.032,
-    color: COLORS.TEXT_SECONDARY,
-    fontStyle: 'italic',
+    color: Colors.TEXT_SECONDARY,
+    fontStyle: "italic",
   },
   completedTeamName: {
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     opacity: 0.7,
   },
   scoreInput: {
@@ -834,44 +916,44 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: width * 0.06,
     fontWeight: "900",
-    color: COLORS.TITLE_COLOR,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    color: Colors.TITLE_COLOR,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: "rgba(255, 255, 255, 0.2)",
     paddingVertical: 6,
     marginLeft: 10,
   },
   completedScoreInput: {
-    color: COLORS.TITLE_COLOR,
-    backgroundColor: 'rgba(255, 255, 255, 0)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    color: Colors.TITLE_COLOR,
+    backgroundColor: "rgba(255, 255, 255, 0)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   vsText: {
     textAlign: "center",
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     fontSize: width * 0.035,
     marginVertical: 4,
     fontWeight: "bold",
   },
   completeButton: {
-    backgroundColor: COLORS.ACCENT,
+    backgroundColor: Colors.ACCENT,
     borderRadius: 10,
     paddingVertical: 12,
     marginTop: 20,
     alignItems: "center",
   },
   buttonDisabled: {
-    backgroundColor: COLORS.PRIMARY,
+    backgroundColor: Colors.PRIMARY,
     opacity: 0.6,
   },
   completeButtonText: {
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
   editButton: {
-    backgroundColor: COLORS.PRIMARY,
+    backgroundColor: Colors.PRIMARY,
     borderRadius: 10,
     paddingVertical: 12,
     marginTop: 15,
@@ -879,20 +961,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: COLORS.ACCENT,
+    borderColor: Colors.ACCENT,
   },
   editButtonText: {
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
   pointsTableContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: "rgba(255, 255, 255, 0.15)",
     overflow: "hidden",
-    shadowColor: COLORS.ACCENT,
+    shadowColor: Colors.ACCENT,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -901,32 +983,32 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: "row",
-    paddingVertical: 12, 
+    paddingVertical: 12,
     paddingHorizontal: width * 0.04,
     borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
     alignItems: "center",
   },
   tableHeader: {
-    backgroundColor: 'rgba(139, 0, 0, 0.6)',
+    backgroundColor: "rgba(139, 0, 0, 0.6)",
     borderBottomWidth: 2,
-    borderBottomColor: COLORS.ACCENT,
+    borderBottomColor: Colors.ACCENT,
     paddingVertical: 14,
   },
   headerText: {
     fontSize: width * 0.038,
     fontWeight: "900",
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
   },
   alternateRow: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
   },
   topRankRow: {
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
   },
   tableCellText: {
     fontSize: width * 0.038,
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
   },
   rankText: {
     fontWeight: "bold",
@@ -935,11 +1017,11 @@ const styles = StyleSheet.create({
   pointsText: {
     fontWeight: "900",
     fontSize: width * 0.048,
-    color: COLORS.ACCENT,
-    backgroundColor: 'rgba(139, 0, 0, 0.3)',
+    color: Colors.ACCENT,
+    backgroundColor: "rgba(139, 0, 0, 0.3)",
     borderRadius: 5,
     paddingVertical: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   nrrText: {
     fontWeight: "700",
@@ -949,41 +1031,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.01,
   },
   teamCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0)',
+    backgroundColor: "rgba(255, 255, 255, 0)",
     borderRadius: 15,
     padding: width * 0.05,
     marginBottom: 15,
     borderLeftWidth: 5,
-    borderLeftColor: COLORS.ACCENT,
+    borderLeftColor: Colors.ACCENT,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: COLORS.ACCENT,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    shadowColor: Colors.ACCENT,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
-    backdropFilter: 'blur(10px)',
+    backdropFilter: "blur(10px)",
   },
   teamHeader: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     marginBottom: 10,
   },
   teamIndex: {
     fontSize: width * 0.05,
-    fontWeight: '900',
-    color: COLORS.ACCENT,
+    fontWeight: "900",
+    color: Colors.ACCENT,
     marginRight: 10,
   },
   teamFullName: {
     fontSize: width * 0.05,
-    fontWeight: 'bold',
-    color: COLORS.TITLE_COLOR,
+    fontWeight: "bold",
+    color: Colors.TITLE_COLOR,
   },
   playersTitle: {
     fontSize: width * 0.035,
-    fontWeight: 'bold',
-    color: COLORS.ACCENT,
+    fontWeight: "bold",
+    color: Colors.ACCENT,
     marginTop: 5,
     marginBottom: 5,
   },
@@ -993,17 +1075,17 @@ const styles = StyleSheet.create({
   },
   playerItem: {
     fontSize: width * 0.04,
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
     paddingVertical: 2,
   },
   detailSeparator: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     marginVertical: 8,
   },
   detailTextSmall: {
     fontSize: width * 0.035,
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     opacity: 0.8,
   },
   loadingContainer: {
@@ -1011,28 +1093,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     minHeight: 300,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: Colors.BACKGROUND,
   },
   loadingText: {
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     marginTop: 10,
     fontSize: width * 0.04,
   },
   errorText: {
-    color: COLORS.ERROR,
+    color: Colors.ERROR,
     fontSize: width * 0.04,
     textAlign: "center",
     marginTop: 20,
   },
   emptyText: {
-    color: COLORS.TEXT_SECONDARY,
+    color: Colors.TEXT_SECONDARY,
     fontSize: width * 0.035,
     textAlign: "center",
     padding: 20,
     fontStyle: "italic",
   },
   retryButton: {
-    backgroundColor: COLORS.ACCENT,
+    backgroundColor: Colors.ACCENT,
     borderRadius: 10,
     paddingVertical: 12,
     marginTop: 20,
@@ -1040,7 +1122,7 @@ const styles = StyleSheet.create({
     marginHorizontal: width * 0.2,
   },
   retryButtonText: {
-    color: COLORS.TITLE_COLOR,
+    color: Colors.TITLE_COLOR,
     fontSize: width * 0.04,
     fontWeight: "bold",
   },
