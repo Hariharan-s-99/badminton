@@ -15,7 +15,6 @@ import {
   View,
 } from "react-native";
 
-// Color constants
 const COLORS = {
   BACKGROUND: "#1A0505",
   TITLE_COLOR: "#FFFFFF",
@@ -85,7 +84,6 @@ const TEAM_NAMES = [
   "Hot Shots",
 ];
 
-// Storage key prefix
 const STORAGE_KEY_PREFIX = 'tournament_progress_';
 
 // Fisher-Yates shuffle algorithm for better randomization
@@ -107,7 +105,6 @@ const TournamentPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [storedTeamDetails, setStoredTeamDetails] = useState<TeamDetail[]>([]);
 
-  // Parse tournament data with validation
   const tournament: TournamentData | null = useMemo(() => {
     if (params.tournamentData) {
       try {
@@ -172,7 +169,6 @@ const TournamentPage: React.FC = () => {
     }
   };
 
-  // Generate shuffled team details
   const generateTeamDetails = useMemo(() => {
     return (): TeamDetail[] => {
       if (!tournament) return [];
@@ -209,7 +205,6 @@ const TournamentPage: React.FC = () => {
     };
   }, [tournament]);
 
-  // Set navigation options
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -230,18 +225,15 @@ const TournamentPage: React.FC = () => {
       setIsLoading(true);
 
       try {
-        // Try to load existing progress
         const storedData = await loadTournamentProgress(tournament.id);
 
         if (storedData && storedData.matches.length > 0) {
-          // Load from storage
           setMatches(storedData.matches);
           setStoredTeamDetails(storedData.teamDetails);
           setIsLoading(false);
           return;
         }
 
-        // Generate new fixtures if no stored data
         const teamDetails = generateTeamDetails();
         
         if (teamDetails.length === 0) {
@@ -269,7 +261,6 @@ const TournamentPage: React.FC = () => {
         const shuffledFixtures = shuffleArray(fixtures);
         setMatches(shuffledFixtures);
 
-        // Save initial state
         await saveTournamentProgress(tournament.id, shuffledFixtures, teamDetails);
         
         setIsLoading(false);
@@ -283,14 +274,12 @@ const TournamentPage: React.FC = () => {
     initializeTournament();
   }, [tournament, generateTeamDetails]);
 
-  // Save progress whenever matches change
   useEffect(() => {
     if (tournament && matches.length > 0 && storedTeamDetails.length > 0 && !isLoading) {
       saveTournamentProgress(tournament.id, matches, storedTeamDetails);
     }
   }, [matches, tournament, storedTeamDetails, isLoading]);
 
-  // Enhanced score update with robust validation
   const updateScore = (id: string, team: "A" | "B", value: string) => {
     const cleanedValue = value.trim();
     if (cleanedValue === "") {
@@ -319,7 +308,6 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  // Handle match completion
   const completeMatch = (id: string) => {
     setMatches(prev =>
       prev.map(m =>
@@ -330,7 +318,6 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  // Handle match edit (reopen completed match)
   const editMatch = (id: string) => {
     setMatches(prev =>
       prev.map(m =>
@@ -339,7 +326,6 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  // Reset tournament (clear storage and regenerate)
   const resetTournament = async () => {
     if (tournament) {
       await clearTournamentProgress(tournament.id);
@@ -350,7 +336,6 @@ const TournamentPage: React.FC = () => {
     }
   };
 
-  // Optimized points table with Net Run Rate
   const pointsTable = useMemo(() => {
     const teamStats: Record<string, { 
       points: number;
