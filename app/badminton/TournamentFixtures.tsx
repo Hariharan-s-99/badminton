@@ -576,14 +576,7 @@ const TournamentPage: React.FC = () => {
         </Text>
       ) : (
         pointsTable.map((item, index) => {
-          const rankColor =
-            index === 0
-              ? Colors.GOLD
-              : index === 1
-              ? Colors.SILVER
-              : index === 2
-              ? Colors.BRONZE
-              : Colors.TITLE_COLOR;
+          const rankColor = Colors.TITLE_COLOR;
           const isTopRank = index < 3;
           const nrrColor =
             item.nrr > 0

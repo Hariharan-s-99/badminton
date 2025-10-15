@@ -20,6 +20,7 @@ export const Colors = {
   PRIMARY: "#8B0000",
   ERROR: "#FF4D4D",
   LIGHT_BG: "rgba(255, 255, 255, 0.08)",
+  SUCCESS: "#4CAF50",
   button: {
     GO_TEXT: "#E8E8E8",
   },
