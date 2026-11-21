@@ -1,50 +1,50 @@
-# Welcome to your Expo app 👋
+# Winzz
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Badminton tournament management and sports platform.
 
-## Get started
+**Web-first:** the web app is built and validated first (mobile-width, responsive); Android and iOS follow from the same codebase.
 
-1. Install dependencies
+## Tech stack
 
-   ```bash
-   npm install
-   ```
+- Expo (SDK ~54) and Expo Router ~6 (file-based routing)
+- React Native + TypeScript
+- Styling with React Native `StyleSheet` (no Tailwind / NativeWind)
+- Static web export via `expo export --platform web`
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+npm install
+npm run web          # dev server (web)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+| Script | What it does |
+| --- | --- |
+| `npm start` | Start the Expo dev server |
+| `npm run web` | Start for web |
+| `npm run android` / `npm run ios` | Start for a native platform |
+| `npm run build:web` | Static web export to `dist/` |
+| `npm run lint` | Lint with `expo lint` |
 
-## Learn more
+## Screens
 
-To learn more about developing your project with Expo, look at the following resources:
+| Route | File | Description |
+| --- | --- | --- |
+| `/` | `app/index.tsx` | Loading screen; progress bar, then goes to `/login` |
+| `/login` | `app/login.tsx` | Login; the Sign Up tab goes to `/signup` |
+| `/signup` | `app/signup.tsx` | Sign up (playing level, hand) |
+| `/welcome` | `app/welcome.tsx` | Shown after login |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Project structure
 
-## Join the community
+```
+app/            Expo Router screens
+components/     Shared UI (WinzzBackground, WinzzLogo, AuthInput, GradientButton,
+                OptionGroup, HandIcon, ...)
+constants/      Colors and Fonts; brand colors live here, never hardcode hex in components
+assets/images/  App icons, shared background (winzz_background.jpg), logo pieces
+```
 
-Join our community of developers creating universal apps.
+All screens share one background image. Auth screens are compact and not scrollable by design.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See [CLAUDE.md](CLAUDE.md) for design and layout conventions.
