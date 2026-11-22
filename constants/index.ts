@@ -25,6 +25,34 @@ export const Colors = {
   BLACK: '#000000',
   TEXT_LIGHT: '#B5B5B5',
   SURFACE_DARK: '#0A0A0A',
+  GOLD: '#F2B01E',
+  GOLD_BORDER: 'rgba(242, 176, 30, 0.6)',
+  GOLD_BG: 'rgba(60, 45, 20, 0.7)',
+  AVATAR_BG: '#EDEDED',
+  HOME_BG: '#121111',
+  PANEL_BG: '#121111',
+  TILE_BG: '#0E0E0E',
+  CARD_RED: '#B32124',
+  ORANGE: '#E99523',
+  AMBER: '#FFB000',
+  GREEN: '#22B814',
+  BLUE: '#1E7FEF',
+  DOT_INACTIVE: '#6B6B6B',
+  PANEL_FILL: 'rgba(20, 17, 17, 0.95)',
+  STAT_GREEN: '#0E6207',
+  STREAK_ORANGE: '#FFB446',
+  RATE_ORANGE: '#FF8833',
+  RATE_DEEP_ORANGE: '#FF6D33',
+  RATE_GREEN: '#1DB90F',
+  RATE_BLUE: '#33A3FF',
+  LINK_BLUE: '#0B84EE',
+  NAV_LABEL: '#EEEEEE',
+  GOLD_TEXT: '#FFAE00',
+  GOLD_EDGE: '#87490E',
+  NAV_BG: 'rgba(8, 8, 10, 0.92)',
+  NAV_BORDER: 'rgba(25, 183, 199, 0.45)',
+  NAV_CENTER_START: '#E8202A',
+  NAV_CENTER_END: '#8E0A10',
 };
 
 export const Fonts = Platform.select({
@@ -47,3 +75,13 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+// Home design fonts (loaded in app/_layout.tsx). The Figma file uses Roboto
+// Condensed and Bahnschrift; Barlow is the closest web-safe match for Bahnschrift.
+export const HomeFonts = {
+  medium: 'RobotoCondensed_500Medium',
+  condensed: 'BarlowCondensed_500Medium',
+  semiCondensed: 'BarlowCondensed_600SemiBold',
+  regular: 'BarlowSemiCondensed_400Regular',
+  bold: 'BarlowSemiCondensed_700Bold',
+};

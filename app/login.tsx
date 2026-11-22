@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const handleLogin = () => {
     setSubmitted(true);
     if (identifier.trim() && password) {
-      router.replace({ pathname: '/welcome', params: { user: identifier.trim() } });
+      router.replace('/home');
     }
   };
 
