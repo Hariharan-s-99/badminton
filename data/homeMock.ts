@@ -35,10 +35,10 @@ export const LIVE_MATCHES: Match[] = [
   {
     id: '06',
     title: 'MATCH 06',
-    court: 'Court 2',
+    court: 'Court 1',
     rules: '21 Points - 1 Set',
-    left: { team: 'SPARTAN', players: ['Nidhin', 'Hemanth'] },
-    right: { team: 'FALCONS', players: ['Subbu', 'Gokul'] },
+    left: { team: 'SPARTAN', players: ['Subbu', 'Hemanth'] },
+    right: { team: 'FALCONS', players: ['Gokul', 'Ashwin'] },
     score: [0, 0],
   },
 ];
@@ -104,5 +104,5 @@ export const TOP_PLAYERS = [
   { rank: 2, name: 'Babu', winRate: 79, matches: 138 },
   { rank: 3, name: 'Naveen', winRate: 74, matches: 126 },
   { rank: 4, name: 'Shivoo', winRate: 69, matches: 112 },
-  { rank: 5, name: 'Naveen', winRate: 65, matches: 98 },
+  { rank: 5, name: 'Subbu', winRate: 65, matches: 98 },
 ];

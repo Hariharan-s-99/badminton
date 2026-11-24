@@ -39,6 +39,23 @@ export const Colors = {
   BLUE: '#1E7FEF',
   DOT_INACTIVE: '#6B6B6B',
   PANEL_FILL: 'rgba(20, 17, 17, 0.95)',
+  PANEL_SOLID: '#141111',
+  // Panel outline: red (left) -> teal (right), shaded towards the top-left.
+  PANEL_EDGE_RED: '#C51B23',
+  PANEL_EDGE_TEAL: '#21B6AD',
+  PANEL_EDGE_SHADE: 'rgba(20, 17, 17, 0.62)',
+  // Live-match card (compact Home)
+  LIVE_EDGE_LEFT: '#B84645',
+  LIVE_EDGE_RIGHT: '#43626D',
+  LIVE_TINT_RED: 'rgba(120, 12, 12, 0.55)',
+  LIVE_TINT_BLUE: 'rgba(12, 60, 100, 0.55)',
+  LIVE_GOLD: '#A48862',
+  LIVE_TEAL: '#54A496',
+  SCORE_RED: '#CF131B',
+  SCORE_TEAL: '#22B4AC',
+  RATE_AMBER: '#ED7627',
+  RATE_ROSE: '#D14D4D',
+  RATE_PURPLE: '#A014F8',
   STAT_GREEN: '#0E6207',
   STREAK_ORANGE: '#FFB446',
   RATE_ORANGE: '#FF8833',
@@ -84,4 +101,16 @@ export const HomeFonts = {
   semiCondensed: 'BarlowCondensed_600SemiBold',
   regular: 'BarlowSemiCondensed_400Regular',
   bold: 'BarlowSemiCondensed_700Bold',
+};
+
+// Gold-player badge fill (Figma "Gold player" rectangle), left -> right.
+export const GoldGradient = {
+  colors: [
+    'rgba(135, 73, 14, 0.3)',
+    'rgba(251, 230, 123, 0.3)',
+    'rgba(252, 251, 231, 0.3)',
+    'rgba(247, 209, 78, 0.3)',
+    'rgba(212, 160, 65, 0.3)',
+  ] as const,
+  locations: [0.00438, 0.32987, 0.5357, 0.77024, 1] as const,
 };
