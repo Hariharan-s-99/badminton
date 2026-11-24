@@ -3,11 +3,7 @@ import BottomNavBar from '../../components/BottomNavBar';
 import WinzzBackground from '../../components/WinzzBackground';
 import { Colors } from '../../constants';
 
-const HOME_ART = {
-  source: require('../../assets/images/winzz_home_background.png'),
-  ratio: 1267 / 2768,
-  color: Colors.HOME_BG,
-};
+const HOME_ART = { color: Colors.HOME_BG };
 
 export default function TabsLayout() {
   const pathname = usePathname();

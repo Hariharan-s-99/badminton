@@ -14,9 +14,9 @@ type Props = {
 export default function GradientBorder({ radius, width, style, innerStyle, children }: Props) {
   return (
     <LinearGradient
-      colors={[Colors.NAV_BORDER, Colors.BORDER]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      colors={[Colors.PANEL_EDGE_RED, Colors.PANEL_EDGE_TEAL]}
+      start={{ x: 0, y: 0.3 }}
+      end={{ x: 1, y: 0.7 }}
       style={[{ borderRadius: radius, padding: width }, style]}
     >
       <View style={[styles.inner, { borderRadius: Math.max(radius - width, 0) }, innerStyle]}>
