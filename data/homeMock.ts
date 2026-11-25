@@ -49,18 +49,18 @@ export const COMPLETED_MATCHES: Match[] = [
     title: 'MATCH 01',
     court: 'Court 1',
     rules: '21 Points - 1 Set',
-    left: LIVE_MATCHES[0].left,
-    right: LIVE_MATCHES[0].right,
+    left: { team: 'WARRIORS', players: ['Hari', 'Naveen'] },
+    right: { team: 'TITANS', players: ['Babu', 'Shivoo'] },
     score: [21, 15],
     result: 'WARRIORS WIN',
   },
   {
-    id: '02',
-    title: 'MATCH 02',
-    court: 'Court 2',
+    id: '06',
+    title: 'MATCH 06',
+    court: 'Court 1',
     rules: '21 Points - 1 Set',
-    left: LIVE_MATCHES[1].left,
-    right: LIVE_MATCHES[1].right,
+    left: { team: 'SPARTAN', players: ['Subbu', 'Hemanth'] },
+    right: { team: 'FALCONS', players: ['Gokul', 'Ashwin'] },
     score: [9, 21],
     result: 'FALCONS WIN',
   },
@@ -68,35 +68,46 @@ export const COMPLETED_MATCHES: Match[] = [
 
 export const UPCOMING_MATCHES: Match[] = [
   {
-    id: '06',
-    title: 'Match 06',
-    court: 'Court 01',
-    rules: '',
-    left: { team: 'WARRIORS', players: ['Hari', 'Naveen'] },
-    right: { team: 'TITANS', players: ['Nidhin', 'Hemanth'] },
-  },
-  {
     id: '07',
     title: 'Match 07',
-    court: 'Court 02',
+    court: 'Court 01',
     rules: '',
-    left: { team: 'SPARTAN', players: ['Subbu', 'Rajesh'] },
-    right: { team: 'FALCONS', players: ['Babu', 'Hemanth'] },
+    left: { team: 'CITY BULLS', players: ['Subbu', 'Rajesh'] },
+    right: { team: 'FALCONS', players: ['Subbu', 'Rajesh'] },
   },
   {
     id: '08',
     title: 'Match 08',
-    court: 'Court 03',
+    court: 'Court 02',
     rules: '',
-    left: { team: 'WARRIORS', players: ['Arun', 'Ashwin'] },
-    right: { team: 'TITANS', players: ['Loka', 'Hemanth'] },
+    left: { team: 'NET NINJAS', players: ['Nidhin', 'Hemanth'] },
+    right: { team: 'TITANS', players: ['Babu', 'Shivoo'] },
+  },
+  {
+    id: '09',
+    title: 'Match 09',
+    court: 'Court 01',
+    rules: '',
+    left: { team: 'SPARTAN', players: ['Gokul', 'Ashwin'] },
+    right: { team: 'WARRIORS', players: ['Hari', 'Naveen'] },
   },
 ];
 
-export const POINT_TABLE = [
-  { pos: '01', team: 'WARRIORS' as TeamKey, players: ['Hari', 'Naveen'], played: 6, won: 5, lost: 1, points: 10, diff: 48 },
-  { pos: '02', team: 'SPARTAN' as TeamKey, players: ['Babu', 'Shivoo'], played: 6, won: 4, lost: 2, points: 8, diff: 22 },
-  { pos: '03', team: 'FALCONS' as TeamKey, players: ['Nidhin', 'Hemanth'], played: 6, won: 4, lost: 2, points: 8, diff: 18 },
+export type PointRow = {
+  pos: string;
+  team: TeamKey;
+  players: [string, string];
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+  diff: number;
+};
+
+export const POINT_TABLE: PointRow[] = [
+  { pos: '01', team: 'CITY BULLS', players: ['Subbu', 'Rajesh'], played: 6, won: 5, lost: 1, points: 10, diff: 48 },
+  { pos: '02', team: 'NET NINJAS', players: ['Babu', 'Shivoo'], played: 6, won: 4, lost: 2, points: 8, diff: 22 },
+  { pos: '03', team: 'SPARTAN', players: ['Gokul', 'Ashwin'], played: 6, won: 4, lost: 2, points: 8, diff: 18 },
 ];
 
 export const TOP_PLAYERS = [

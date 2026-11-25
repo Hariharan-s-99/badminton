@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo-google-fonts/barlow-condensed": "^0.4.1",
     "@expo-google-fonts/barlow-semi-condensed": "^0.4.1",
+    "@expo-google-fonts/chakra-petch": "^0.4.1",
     "@expo-google-fonts/roboto-condensed": "^0.4.2",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",

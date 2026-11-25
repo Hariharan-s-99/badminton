@@ -51,6 +51,10 @@ export const Colors = {
   LIVE_TINT_BLUE: 'rgba(12, 60, 100, 0.55)',
   LIVE_GOLD: '#A48862',
   LIVE_TEAL: '#54A496',
+  // Match-card outline: the halves meet the centre title in gold (left) / teal (right).
+  LIVE_EDGE_GOLD: '#BB864A',
+  LIVE_EDGE_GOLD_DIM: '#C2A468',
+  LIVE_EDGE_TEAL_DIM: '#8CB4B8',
   SCORE_RED: '#CF131B',
   SCORE_TEAL: '#22B4AC',
   RATE_AMBER: '#ED7627',
@@ -100,7 +104,11 @@ export const HomeFonts = {
   condensed: 'BarlowCondensed_500Medium',
   semiCondensed: 'BarlowCondensed_600SemiBold',
   regular: 'BarlowSemiCondensed_400Regular',
+  mediumSemi: 'BarlowSemiCondensed_500Medium',
+  semiBold: 'BarlowSemiCondensed_600SemiBold',
   bold: 'BarlowSemiCondensed_700Bold',
+  // match scores (live & completed cards)
+  score: 'ChakraPetch_600SemiBold',
 };
 
 // Gold-player badge fill (Figma "Gold player" rectangle), left -> right.
@@ -113,4 +121,10 @@ export const GoldGradient = {
     'rgba(212, 160, 65, 0.3)',
   ] as const,
   locations: [0.00438, 0.32987, 0.5357, 0.77024, 1] as const,
+};
+
+// "WARRIORS WIN" result text on completed-match cards, left -> right.
+export const ResultGoldGradient = {
+  colors: ['#D49E2C', '#E4DCAE', '#C6A52C', '#D2C47E', '#F2ECBC'] as const,
+  locations: [0, 0.3, 0.62, 0.82, 1] as const,
 };

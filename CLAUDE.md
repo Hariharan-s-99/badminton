@@ -49,7 +49,11 @@ components/
     ProfileHeader.tsx    — avatar, "Hi, Player", gold badge, ranking
     ActionCards.tsx      — START NEW MATCH / TOURNAMENT buttons
     PerformancePanel.tsx — MY PERFORMANCE: 4 stat tiles
-    LiveMatches.tsx      — LIVE MATCHES: 2 match cards + carousel dots
+    accordion/           — the paged middle panel (173 tall on every page):
+      index.tsx          — LIVE / COMPLETED / UPCOMING / POINT TABLE pages + dots
+      MatchCard.tsx      — live & completed match card (score box, result text)
+      CardFrame.tsx      — SVG bracket outline of a match card
+      UpcomingTable.tsx / PointTable.tsx — the table pages
     TopPlayers.tsx       — TOP PLAYERS: 5 player cards
     Panel.tsx            — dark card with red->teal outline (used by every section)
     SectionTitle.tsx     — "TITLE ...... VIEW ALL >" row (+ Dot)
@@ -72,8 +76,9 @@ constants/
 - Web output is `static` (pre-rendered, no window): never size with `useWindowDimensions`/`Dimensions` or other values that differ between server and client — React won't patch mismatched styles on hydration and widths stay 0. Use `%`, `flex`, `aspectRatio`, `maxWidth`.
 - react-native-web sizes `<Image>` to its natural pixels unless BOTH width and height are explicit (aspectRatio is ignored, absoluteFill isn't enough). Use `RatioImage` for ratio-sized images.
 - All screens share one background, the splatter extracted from the Figma splash frame (logo/UI blanked out), except Home: it uses `winzz_home_background.png` (smash player + splatter pinned to the top, flat `Colors.HOME_BG` below) drawn at the top of Home's `ScrollView` (so it scrolls with the page) over `WinzzBackground`'s flat `topArt` colour set in `app/(tabs)/_layout.tsx`. Don't add other per-screen backgrounds without asking.
-- Home (`app/(tabs)/home.tsx`) is a plain vertical `ScrollView` of fixed-height sections (design: Figma 366x788 frame). Each section in `components/home/` exports its height (`HEADER_HEIGHT`, `ACTION_CARDS_HEIGHT`, `PERFORMANCE_HEIGHT`, `LIVE_MATCHES_HEIGHT`, `TOP_PLAYERS_HEIGHT`) and lays itself out with normal flexbox: width is automatic (fills the screen, max 414, 6px side padding), so rows use `flex: 1` + `gap`, never absolute coordinates or canvas scaling. Shared bits: `Panel` (red->teal outlined dark card) and `SectionTitle` (title + "VIEW ALL >"). Placeholder data in `data/homeMock.ts`, team logos (PNGs extracted from the supplied SVGs) in `assets/team-logos/` mapped in `data/teams.ts`, icons rasterised from the Figma SVGs in `assets/home/`. Fonts: Figma uses Roboto Condensed + Bahnschrift; the app uses Roboto Condensed + Barlow (`HomeFonts` in `constants/index.ts`, loaded in `app/_layout.tsx`).
-- Check Home changes by screenshotting at 366x788 (deviceScaleFactor 2) against the design export.
+- Home (`app/(tabs)/home.tsx`) is a plain vertical `ScrollView` of fixed-height sections (design: Figma 366x788 frame). Each section in `components/home/` exports its height (`HEADER_HEIGHT`, `ACTION_CARDS_HEIGHT`, `PERFORMANCE_HEIGHT`, `ACCORDION_HEIGHT`, `TOP_PLAYERS_HEIGHT`) and lays itself out with normal flexbox: width is automatic (fills the screen, max 414, 6px side padding), so rows use `flex: 1` + `gap`, never absolute coordinates or canvas scaling. Shared bits: `Panel` (red->teal outlined dark card) and `SectionTitle` (title + "VIEW ALL >"). Placeholder data in `data/homeMock.ts`, team logos (PNGs extracted from the supplied SVGs) in `assets/team-logos/` mapped in `data/teams.ts`, icons rasterised from the Figma SVGs in `assets/home/`. Fonts: Figma uses Roboto Condensed + Bahnschrift; the app uses Roboto Condensed + Barlow (`HomeFonts` in `constants/index.ts`, loaded in `app/_layout.tsx`).
+- Check Home changes by screenshotting at 360x740 (deviceScaleFactor 2) against the design export (the current Figma frame is 360x740; exports can carry ~5px of extra art on the right). The accordion pages are switched by pressing their dots (`aria-label="Show <page title>"`).
+- The "accordion" is the user's name for the paged middle panel on Home (Live / Completed / Upcoming matches, Point table).
 - Auth-screen design sizes were measured against a 390px-wide phone. Text inputs use 16px font on purpose (iOS Safari zooms the page on focus below 16px).
 - Visual check workflow: `npx expo export --platform web --output-dir <scratch>` then screenshot with playwright-core + system Chrome. Headless Chrome with virtual time does not run the animation or load all images reliably — wait in real time instead.
 - Serving the export: routes inside `(tabs)` are written as `<out>/(tabs)/home.html`, so a plain static server 404s on `/home` — map `/home` to that file (or serve with a fallback) before screenshotting.

@@ -7,12 +7,14 @@ type Props = {
   height?: number;
   radius?: number;
   border?: number;
+  /** Darken the outline towards the top-left (section panels). Off for flat table boxes. */
+  shade?: boolean;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   children?: ReactNode;
 };
 
-export default function Panel({ height, radius = 8, border = 1.2, style, contentStyle, children }: Props) {
+export default function Panel({ height, radius = 8, border = 1.2, shade = true, style, contentStyle, children }: Props) {
   return (
     <View style={[{ height, borderRadius: radius, padding: border, overflow: 'hidden' }, style]}>
       <LinearGradient
@@ -21,13 +23,15 @@ export default function Panel({ height, radius = 8, border = 1.2, style, content
         end={{ x: 1, y: 0 }}
         style={StyleSheet.absoluteFill}
       />
-      <LinearGradient
-        colors={[Colors.PANEL_EDGE_SHADE, Colors.PANEL_EDGE_SHADE, 'transparent']}
-        locations={[0, 0.4, 0.75]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.3, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      {shade ? (
+        <LinearGradient
+          colors={[Colors.PANEL_EDGE_SHADE, Colors.PANEL_EDGE_SHADE, 'transparent']}
+          locations={[0, 0.4, 0.75]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.3, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
       <View style={[styles.fill, { borderRadius: Math.max(radius - border, 0) }, contentStyle]}>{children}</View>
     </View>
   );

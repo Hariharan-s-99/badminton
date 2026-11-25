@@ -1,5 +1,11 @@
 import { BarlowCondensed_500Medium, BarlowCondensed_600SemiBold } from '@expo-google-fonts/barlow-condensed';
-import { BarlowSemiCondensed_400Regular, BarlowSemiCondensed_700Bold } from '@expo-google-fonts/barlow-semi-condensed';
+import {
+  BarlowSemiCondensed_400Regular,
+  BarlowSemiCondensed_500Medium,
+  BarlowSemiCondensed_600SemiBold,
+  BarlowSemiCondensed_700Bold,
+} from '@expo-google-fonts/barlow-semi-condensed';
+import { ChakraPetch_600SemiBold } from '@expo-google-fonts/chakra-petch';
 import { RobotoCondensed_500Medium } from '@expo-google-fonts/roboto-condensed';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -12,8 +18,11 @@ export default function RootLayout() {
     BarlowCondensed_500Medium,
     BarlowCondensed_600SemiBold,
     BarlowSemiCondensed_400Regular,
+    BarlowSemiCondensed_500Medium,
+    BarlowSemiCondensed_600SemiBold,
     BarlowSemiCondensed_700Bold,
     RobotoCondensed_500Medium,
+    ChakraPetch_600SemiBold,
   });
   return (
     <>

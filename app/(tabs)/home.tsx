@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
+import Accordion from '../../components/home/accordion';
 import ActionCards from '../../components/home/ActionCards';
-import LiveMatches from '../../components/home/LiveMatches';
 import PerformancePanel from '../../components/home/PerformancePanel';
 import ProfileHeader from '../../components/home/ProfileHeader';
 import TopPlayers from '../../components/home/TopPlayers';
@@ -19,7 +19,7 @@ export default function HomeScreen() {
       <ProfileHeader />
       <ActionCards />
       <PerformancePanel />
-      <LiveMatches />
+      <Accordion />
       <TopPlayers />
     </ScrollView>
   );
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     gap: 10,
   },
-  art: { position: 'absolute', top: 0, left: 0, right: 0 },
+  art: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' },
   artImage: { width: '100%' },
 });
